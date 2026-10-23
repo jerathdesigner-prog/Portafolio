@@ -3,6 +3,10 @@
 Forks (`mf-template`, new MFs) are independent repos whose history may not share a root with this
 one. Changes flow with a real `git merge`, never by copying files by hand.
 
+For the automated end-to-end procedure — conflict decision gates, version alignment with the host,
+Native Federation contract checks and the verification gate — load
+[`.agents/skills/merge-fork-from-front-template/SKILL.md`](skills/merge-fork-from-front-template/SKILL.md).
+
 ```bash
 git remote add template https://gitads.aseguradoradelsur.com/neocore/core/front-template.git  # once
 git fetch template

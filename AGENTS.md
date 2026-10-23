@@ -59,7 +59,7 @@ Fork-only capabilities: [`.agents/capabilities.local.md`](.agents/capabilities.l
 - Environment variables and `SECRET_KEY` → [`.agents/environment.md`](.agents/environment.md)
 - Testing → [`.agents/testing.md`](.agents/testing.md)
 - Docker, nginx, CI/CD → [`.agents/deployment.md`](.agents/deployment.md)
-- Sync a fork with this repo → [`.agents/merge-changes-from-front-template.md`](.agents/merge-changes-from-front-template.md)
+- Sync a fork with this repo → [`.agents/merge-changes-from-front-template.md`](.agents/merge-changes-from-front-template.md) and the end-to-end [merge skill](.agents/skills/merge-fork-from-front-template/SKILL.md)
 - Example module → [`src/app/modules/template/README.md`](src/app/modules/template/README.md)
 
 ## Commands
