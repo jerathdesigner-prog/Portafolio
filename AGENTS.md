@@ -15,8 +15,9 @@ live in [`.agents/`](.agents/); open the relevant doc before touching that area.
 - ⚠️ **If you add, change the contract of, or remove a shared capability, update its map row in the
   same commit.** Fork-only capabilities go in [`.agents/capabilities.local.md`](.agents/capabilities.local.md).
 - ⚠️ [Angular versions are pinned EXACTLY to the host's](.agents/host-integration.md#version-alignment)
-  (`@angular/*` 22.1.7, `@angular/build`/`cli` 22.1.8, TypeScript ~6.0.3). Federation shares them as
-  strict singletons: a drift breaks loading in the host. Never use `^`/`~` on `@angular/*`.
+  (`@angular/*` 22.2.1, `@angular/build`/`cli` 22.2.1, Native Federation 22.2.2, TypeScript ~6.0.3).
+  Federation shares them as strict singletons: a drift breaks loading in the host. Never use `^`/`~`
+  on `@angular/*`.
 - ⚠️ [Exposes key `./X` must equal the exported symbol `X`](.agents/host-integration.md#exposing-a-module)
   — the host resolves `m[exposedModule]`. [Exposed `Routes` never provide an HttpClient](.agents/host-integration.md#interceptors):
   when hosted, requests use the host's HttpClient and interceptors (auth, errors, loader), like frontcore.

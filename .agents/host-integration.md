@@ -94,9 +94,9 @@ Federation shares Angular, rxjs and tslib as `singleton + strictVersion`. The ho
 
 | Package | Version |
 |---|---|
-| `@angular/*` | 22.1.7 |
-| `@angular/build`, `@angular/cli` | 22.1.8 |
-| `@angular-architects/native-federation` | 22.1.3 |
+| `@angular/*` | 22.2.1 |
+| `@angular/build`, `@angular/cli` | 22.2.1 |
+| `@angular-architects/native-federation` | 22.2.2 |
 | `typescript` | ~6.0.3 |
 | `rxjs` | ~7.8.2 |
 
@@ -107,3 +107,16 @@ the forks (see [`merge-changes-from-front-template.md`](merge-changes-from-front
 
 Local dev ports already in use: container 4200, core/auth 4201, virtual office broker 4211. This
 template serves on **4250**; a fork picks a free port in `angular.json` (`serve-original.options.port`).
+
+## Hot reload in the host
+
+Angular's dev-server HMR only replaces stylesheets. When this remote is loaded by `frontcontainer`,
+template/view edits (the template, `@if`/`@for`/`@defer` content, component styles) are applied by
+the **host's** `watchLocalRemoteRebuilds()`: it listens to the remote's Native Federation
+`buildNotificationsEndpoint` and hot-swaps the live component with `ɵɵreplaceMetadata`. The component
+instance and its state survive and no HTTP call is repeated. Edits to logic, services or any
+non-component code fall back to a full page reload by design.
+
+Requirements: the remote runs from a `localhost` dev server and the host manifest row points at its
+`remoteEntry.json` (see `frontcontainer/docs/local-development.md`). Restart `ng serve` after changing
+`angular.json` polyfills. Measured on this template: ~0.8 s from file save to hot patch.
