@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+
 import type { TemplateInterface } from '../../interfaces/template.interface';
 
 /**

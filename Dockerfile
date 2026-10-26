@@ -5,13 +5,17 @@
 #   prebuilt (CI)      -> reuses the dist/ produced by the `build_app` job
 # Global ARG (before any FROM) so it can be used in `FROM ${DIST_STAGE}`.
 ARG DIST_STAGE=build
+# Bun of the deps/build stages. Source of truth: `.bun-version` — CI passes it
+# with `--build-arg BUN_VERSION=...`; this default must match the file
+# (pinned by scripts/tool-versions.test.js).
+ARG BUN_VERSION=1.4.4
 
 # ==========================================================================
 # 1) DEPS — local/standalone builds only (CI installs in `install_deps`).
 #    Private @neocore packages: pass a .npmrc as a BuildKit secret, e.g.
 #    docker build --secret id=npmrc,src=.npmrc .   (never COPY it).
 # ==========================================================================
-FROM oven/bun:1.4.2-slim AS deps
+FROM oven/bun:${BUN_VERSION}-slim AS deps
 WORKDIR /app
 COPY package.json bun.lock bunfig.toml ./
 # --ignore-scripts: `prepare` bootstraps a developer .env, useless in an image.

@@ -1,6 +1,7 @@
 import type { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { DeviceDetectorService } from 'ngx-device-detector';
+
 import { StorageEnum } from '../enums/storage.enum';
 import { isUsableBearerToken } from '../helpers/bearer-token.helper';
 import { StorageService } from '../services/storage.service';

@@ -22,6 +22,10 @@ const path = require('node:path');
 const KEBAB = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 const PROTECTED = [/TemplateRef/g, /templateUrl/g, /ng-template/g, /\btemplate(?=\s*:\s*[`'"])/g];
 
+function capitalize(word) {
+  return word.charAt(0).toUpperCase() + word.slice(1);
+}
+
 function toCases(name) {
   if (!name || !KEBAB.test(name)) {
     throw new Error(`Invalid module name "${name}": use kebab-case, e.g. --name=user-profile`);
@@ -30,7 +34,6 @@ function toCases(name) {
     throw new Error('"template" is reserved: it is the source module.');
   }
   const words = name.split('-');
-  const capitalize = (word) => word.charAt(0).toUpperCase() + word.slice(1);
   return {
     kebab: name,
     pascal: words.map(capitalize).join(''),
@@ -59,7 +62,7 @@ function transformContent(source, cases) {
     .replace(/Template/g, cases.pascal)
     .replace(/\btemplate\b/g, cases.kebab);
 
-  // biome-ignore lint/suspicious/noControlCharactersInRegex: placeholder delimiter
+  // oxlint-disable-next-line no-control-regex -- placeholder delimiter
   return content.replace(/\u0000(\d+)\u0000/g, (_match, index) => kept[Number(index)]);
 }
 

@@ -1,10 +1,10 @@
 # Testing
 
-| Command | Runs |
-|---|---|
-| `bun run test` | `load-env` (no remote call) → Angular unit tests (vitest via `@angular/build:unit-test`, jsdom) → `test:scripts` |
-| `bun run test:watch` | Angular unit tests in watch mode |
-| `bun run test:scripts` | `node --test` for `scripts/**/*.test.js` (generator) |
+| Command                | Runs                                                                                                             |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `bun run test`         | `load-env` (no remote call) → Angular unit tests (vitest via `@angular/build:unit-test`, jsdom) → `test:scripts` |
+| `bun run test:watch`   | Angular unit tests in watch mode                                                                                 |
+| `bun run test:scripts` | `node --test` for `scripts/**/*.test.js` (generator)                                                             |
 
 ## Rules
 

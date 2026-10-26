@@ -11,7 +11,7 @@ Requirements: [bun](https://bun.sh) 1.4+, Node 22.22+.
 bun install            # dependencies + .env from .env.example
 bun run start          # http://localhost:4250 (standalone, redirects to /template)
 bun run test           # unit tests (vitest) + script tests
-bun run lint           # Biome
+bun run lint           # oxlint
 bun run build          # dist/browser/remoteEntry.json exposing ./TemplateRoutes
 ```
 

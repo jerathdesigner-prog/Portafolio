@@ -15,8 +15,9 @@ live in [`.agents/`](.agents/); open the relevant doc before touching that area.
 - ⚠️ **If you add, change the contract of, or remove a shared capability, update its map row in the
   same commit.** Fork-only capabilities go in [`.agents/capabilities.local.md`](.agents/capabilities.local.md).
 - ⚠️ [Angular versions are pinned EXACTLY to the host's](.agents/host-integration.md#version-alignment)
-  (`@angular/*` 22.1.7, `@angular/build`/`cli` 22.1.8, TypeScript ~6.0.3). Federation shares them as
-  strict singletons: a drift breaks loading in the host. Never use `^`/`~` on `@angular/*`.
+  (`@angular/*` 22.2.1, `@angular/build`/`cli` 22.2.1, Native Federation 22.2.2, TypeScript ~6.0.3).
+  Federation shares them as strict singletons: a drift breaks loading in the host. Never use `^`/`~`
+  on `@angular/*`.
 - ⚠️ [Exposes key `./X` must equal the exported symbol `X`](.agents/host-integration.md#exposing-a-module)
   — the host resolves `m[exposedModule]`. [Exposed `Routes` never provide an HttpClient](.agents/host-integration.md#interceptors):
   when hosted, requests use the host's HttpClient and interceptors (auth, errors, loader), like frontcore.
@@ -36,17 +37,19 @@ live in [`.agents/`](.agents/); open the relevant doc before touching that area.
 ## Capability map
 
 <!-- capability-map:start -->
-| If you need… | Already exists | Entry point | Read |
-|---|---|---|---|
-| HttpClient with auth for standalone dev (also: interceptor, Bearer, x-device-info; hosted mode uses the host's) | `provideMfHttpClient()` + functional `authInterceptor` (Bearer from host token, `x-device-info`) | `src/app/shared/providers/http.providers.ts`, `src/app/shared/interceptors/auth.interceptor.ts` | [`.agents/host-integration.md`](.agents/host-integration.md#interceptors) |
-| Read/write encrypted localStorage shared with the host (also: token, session, encrypt-storage) | `StorageService` + `StorageEnum` (same key names as host/frontcore) | `src/app/shared/services/storage.service.ts`, `src/app/shared/enums/storage.enum.ts` | [`.agents/environment.md`](.agents/environment.md) |
-| Show loader/toasts in the host (also: notifications, pubsub, events) | `PubSubService` + `PubSubTopic` | `src/app/shared/services/pubsub.service.ts`, `src/app/shared/enums/pubsub-topic.enum.ts` | [`.agents/host-integration.md`](.agents/host-integration.md#pubsub-contract) |
-| Permission headers for the gateway (also: x-api-key, resource:action) | `buildPermissionHeaders(resource, action)` | `src/app/shared/helpers/permission-headers.helper.ts` | [`.agents/architecture.md`](.agents/architecture.md) |
-| Backend URL prefix (also: ms-core, gateway path) | `MsPrefixEnum` | `src/app/shared/enums/ms-prefix.enum.ts` | [`.agents/architecture.md`](.agents/architecture.md) |
-| Standard response types (also: pagination, envelope) | `ServiceResponseInterface`, `PaginationResponseInterface` | `src/app/shared/interfaces/response.interface.ts` | — |
-| Validate a bearer token value | `isUsableBearerToken()` | `src/app/shared/helpers/bearer-token.helper.ts` | — |
-| Build-time configuration (also: env, API_URL, environment.ts) | `load-env.js` → `src/environments/environment.ts` | `bun run env` | [`.agents/environment.md`](.agents/environment.md) |
-| Create a feature module (also: scaffold, generator) | Generator cloning `src/app/modules/template` | `bun run generate:module -- --name=<name> [--expose]` | [`src/app/modules/template/README.md`](src/app/modules/template/README.md) |
+
+| If you need…                                                                                                    | Already exists                                                                                   | Entry point                                                                                     | Read                                                                         |
+| --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| HttpClient with auth for standalone dev (also: interceptor, Bearer, x-device-info; hosted mode uses the host's) | `provideMfHttpClient()` + functional `authInterceptor` (Bearer from host token, `x-device-info`) | `src/app/shared/providers/http.providers.ts`, `src/app/shared/interceptors/auth.interceptor.ts` | [`.agents/host-integration.md`](.agents/host-integration.md#interceptors)    |
+| Read/write encrypted localStorage shared with the host (also: token, session, encrypt-storage)                  | `StorageService` + `StorageEnum` (same key names as host/frontcore)                              | `src/app/shared/services/storage.service.ts`, `src/app/shared/enums/storage.enum.ts`            | [`.agents/environment.md`](.agents/environment.md)                           |
+| Show loader/toasts in the host (also: notifications, pubsub, events)                                            | `PubSubService` + `PubSubTopic`                                                                  | `src/app/shared/services/pubsub.service.ts`, `src/app/shared/enums/pubsub-topic.enum.ts`        | [`.agents/host-integration.md`](.agents/host-integration.md#pubsub-contract) |
+| Permission headers for the gateway (also: x-api-key, resource:action)                                           | `buildPermissionHeaders(resource, action)`                                                       | `src/app/shared/helpers/permission-headers.helper.ts`                                           | [`.agents/architecture.md`](.agents/architecture.md)                         |
+| Backend URL prefix (also: ms-core, gateway path)                                                                | `MsPrefixEnum`                                                                                   | `src/app/shared/enums/ms-prefix.enum.ts`                                                        | [`.agents/architecture.md`](.agents/architecture.md)                         |
+| Standard response types (also: pagination, envelope)                                                            | `ServiceResponseInterface`, `PaginationResponseInterface`                                        | `src/app/shared/interfaces/response.interface.ts`                                               | —                                                                            |
+| Validate a bearer token value                                                                                   | `isUsableBearerToken()`                                                                          | `src/app/shared/helpers/bearer-token.helper.ts`                                                 | —                                                                            |
+| Build-time configuration (also: env, API_URL, environment.ts)                                                   | `load-env.js` → `src/environments/environment.ts`                                                | `bun run env`                                                                                   | [`.agents/environment.md`](.agents/environment.md)                           |
+| Create a feature module (also: scaffold, generator)                                                             | Generator cloning `src/app/modules/template`                                                     | `bun run generate:module -- --name=<name> [--expose]`                                           | [`src/app/modules/template/README.md`](src/app/modules/template/README.md)   |
+
 <!-- capability-map:end -->
 
 Fork-only capabilities: [`.agents/capabilities.local.md`](.agents/capabilities.local.md).
@@ -58,7 +61,7 @@ Fork-only capabilities: [`.agents/capabilities.local.md`](.agents/capabilities.l
 - Environment variables and `SECRET_KEY` → [`.agents/environment.md`](.agents/environment.md)
 - Testing → [`.agents/testing.md`](.agents/testing.md)
 - Docker, nginx, CI/CD → [`.agents/deployment.md`](.agents/deployment.md)
-- Sync a fork with this repo → [`.agents/merge-changes-from-front-template.md`](.agents/merge-changes-from-front-template.md)
+- Sync a fork with this repo → [`.agents/merge-changes-from-front-template.md`](.agents/merge-changes-from-front-template.md) and the end-to-end [merge skill](.agents/skills/merge-fork-from-front-template/SKILL.md)
 - Example module → [`src/app/modules/template/README.md`](src/app/modules/template/README.md)
 
 ## Commands
@@ -68,16 +71,23 @@ bun install                  # also creates .env from .env.example (never overwr
 bun run start                # load-env + dev server on http://localhost:4250
 bun run build                # load-env + federation build -> dist/browser/remoteEntry.json
 bun run test                 # vitest (Angular unit tests) + node:test (scripts)
-bun run lint                 # Biome lint
-bun run format               # Biome format (write)
-bun run check                # Biome lint + format + imports (verify only)
+bun run lint                 # oxlint (warnings fail too)
+bun run format               # oxfmt (write); format:check verifies
+bun run check                # oxlint + oxfmt --check (verify only, same as CI)
 bun run generate:module -- --name=<kebab-name> [--expose]
+node scaffold/generate.js --service=mf-template --target=. --force   # regenerate .gitlab-ci.yml
 ```
 
 ## What NOT to do
 
 - No npm/yarn/pnpm, no `package-lock.json`: the lockfile is `bun.lock`.
-- No ESLint/Prettier configuration: Biome is the linter/formatter.
+- No ESLint/Prettier/Biome configuration: Oxc is the linter (`oxlint.config.mts`) and formatter
+  (`oxfmt.config.mts`); a husky pre-commit runs both on staged files (lint-staged).
+- Do not edit `.gitlab-ci.yml` by hand: it is generated from `scaffold/templates/gitlab-ci.yml`
+  (`node scaffold/generate.js --service=mf-template --target=. --force`, see `scaffold/README.md`).
+- Do not hardcode Node/Bun versions: `.node-version` and `.bun-version` are the source of truth
+  (CI `resolve_versions`, Dockerfile `ARG BUN_VERSION`, `package.json`), pinned by
+  `scripts/tool-versions.test.js`.
 - No `^`/`~` ranges on `@angular/*`, `@angular/build`, `@angular/cli`, `@angular-architects/native-federation`.
 - No `.npmrc` with tokens in the repo (CI generates it with `CI_JOB_TOKEN`).
 - No webpack/Module Federation config: this is Native Federation (`federation.config.mjs`).

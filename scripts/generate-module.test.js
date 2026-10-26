@@ -44,7 +44,6 @@ test('transformContent renames symbols, paths, selectors and constants', () => {
     'export const TEMPLATE_PAGE_SIZE = 10;',
     "RESOURCE = 'template',",
     'export const TemplateRoutes: Routes = [];',
-    // biome-ignore lint/suspicious/noTemplateCurlyInString: source code under test
     '`${environment.apiUrl}/${MsPrefixEnum.CORE}/template`',
   ].join('\n');
 
@@ -56,7 +55,6 @@ test('transformContent renames symbols, paths, selectors and constants', () => {
       'export const SAMPLE_FEATURE_PAGE_SIZE = 10;',
       "RESOURCE = 'sample-feature',",
       'export const SampleFeatureRoutes: Routes = [];',
-      // biome-ignore lint/suspicious/noTemplateCurlyInString: expected source code
       '`${environment.apiUrl}/${MsPrefixEnum.CORE}/sample-feature`',
     ].join('\n'),
   );

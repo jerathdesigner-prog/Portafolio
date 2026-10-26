@@ -12,12 +12,7 @@
  * @returns {boolean} true if valid
  */
 function isValidUrl(url) {
-  try {
-    new URL(url);
-    return true;
-  } catch {
-    return false;
-  }
+  return URL.canParse(url);
 }
 
 /**
@@ -35,7 +30,7 @@ function createEnvVar(varName) {
      * @returns {object} Chainable validator
      */
     default(defaultValue) {
-      this._value = value !== undefined ? value : defaultValue;
+      this.resolvedValue = value !== undefined ? value : defaultValue;
       return this;
     },
 
@@ -47,7 +42,7 @@ function createEnvVar(varName) {
       if (value === undefined || value === '') {
         throw new Error(`Required environment variable '${varName}' is not defined`);
       }
-      this._value = value;
+      this.resolvedValue = value;
       return this;
     },
 
@@ -56,7 +51,7 @@ function createEnvVar(varName) {
      * @returns {string} Parsed value
      */
     asString() {
-      const finalValue = this._value !== undefined ? this._value : value;
+      const finalValue = this.resolvedValue !== undefined ? this.resolvedValue : value;
       if (finalValue === undefined || finalValue === '') {
         throw new Error(`Environment variable '${varName}' is not defined`);
       }
@@ -68,7 +63,7 @@ function createEnvVar(varName) {
      * @returns {string} Validated URL
      */
     asUrlString() {
-      const finalValue = this._value !== undefined ? this._value : value;
+      const finalValue = this.resolvedValue !== undefined ? this.resolvedValue : value;
       if (finalValue === undefined || finalValue === '') {
         throw new Error(`Environment variable '${varName}' is not defined`);
       }
@@ -85,7 +80,7 @@ function createEnvVar(varName) {
      * @returns {string} Validated enum value
      */
     asEnum(allowedValues) {
-      const finalValue = this._value !== undefined ? this._value : value;
+      const finalValue = this.resolvedValue !== undefined ? this.resolvedValue : value;
       if (finalValue === undefined || finalValue === '') {
         throw new Error(`Environment variable '${varName}' is not defined`);
       }
@@ -105,7 +100,7 @@ function createEnvVar(varName) {
      * @returns {*} Current value
      */
     _getValue() {
-      return this._value !== undefined ? this._value : value;
+      return this.resolvedValue !== undefined ? this.resolvedValue : value;
     },
   };
 }

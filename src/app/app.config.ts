@@ -1,5 +1,6 @@
 import { type ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
+
 import { routes } from './app.routes';
 import { provideMfHttpClient } from './shared/providers/http.providers';
 

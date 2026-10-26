@@ -1,5 +1,5 @@
-// Local `.env` bootstrap. Runs from the `prepare` lifecycle script
-// (`bun install`), skipped in CI where the pipeline writes `.env` itself.
+// Local `.env` bootstrap. Chained from `prepare.js` (`bun install`), which
+// skips it in CI where the pipeline writes `.env` itself.
 //
 // Copies `.env.example` -> `.env` when `.env` does not exist yet, so a fresh
 // clone is ready for `bun run start` without manual steps. An existing `.env`
@@ -8,10 +8,6 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-
-if (process.env.CI) {
-  process.exit(0);
-}
 
 const root = path.join(__dirname, '..');
 const envPath = path.join(root, '.env');

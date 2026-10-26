@@ -1,5 +1,6 @@
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import type { EnvironmentProviders } from '@angular/core';
+
 import { authInterceptor } from '../interceptors/auth.interceptor';
 
 /**
