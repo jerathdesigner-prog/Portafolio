@@ -7,7 +7,7 @@
     "ng": "ng",
     "prepare": "node prepare.js",
     "env": "node load-env.js",
-    "start": "node load-env.js && ng serve",
+    "start": "node load-env.js && node scripts/serve.js",
     "build": "node load-env.js && ng build",
     "watch": "node load-env.js && ng build --watch --configuration development",
     "test": "SKIP_ENV_FETCH=1 node load-env.js && ng test --watch=false && bun run test:scripts",

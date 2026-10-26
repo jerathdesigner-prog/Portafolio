@@ -68,7 +68,7 @@ Fork-only capabilities: [`.agents/capabilities.local.md`](.agents/capabilities.l
 
 ```bash
 bun install                  # also creates .env from .env.example (never overwrites)
-bun run start                # load-env + dev server on http://localhost:4250
+bun run start                # load-env + dev server (warm-up, see host-integration.md) on :4250
 bun run build                # load-env + federation build -> dist/browser/remoteEntry.json
 bun run test                 # vitest (Angular unit tests) + node:test (scripts)
 bun run lint                 # oxlint (warnings fail too)

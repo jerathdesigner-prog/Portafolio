@@ -120,3 +120,17 @@ non-component code fall back to a full page reload by design.
 Requirements: the remote runs from a `localhost` dev server and the host manifest row points at its
 `remoteEntry.json` (see `frontcontainer/docs/local-development.md`). Restart `ng serve` after changing
 `angular.json` polyfills. Measured on this template: ~0.8 s from file save to hot patch.
+
+## Dev server speed
+
+`bun run start` runs `scripts/serve.js`, which wraps `ng serve` with two tunings (measured on
+frontvirtualofficebroker, 24 exposed modules):
+
+- **Warm-up.** Angular's first rebuild after startup re-emits and re-type-checks the whole program
+  (~13 s for the app, ~27 s together with the federation rebuild); later rebuilds take ~1.5 s. Once
+  the dev server answers, `serve.js` touches (mtime only) the first `exposes` file, so that cost is
+  paid in the background and the first real save is already incremental (~1.2–2 s end to end).
+  Disable with `NG_DEV_WARMUP=0`.
+- **Development build config.** `sourceMap: false` (esbuild `development`) and `rebuildDelay: 0`
+  (federation `serve`) cut the federation rebuild from ~3.2 s to ~1.5 s. Turn source maps back on
+  locally (`"sourceMap": true`) only while debugging in the browser.
