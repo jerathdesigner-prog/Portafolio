@@ -8,6 +8,9 @@ const path = require('node:path');
 const SCAFFOLD_DIR = __dirname;
 const CONFIG_PATH = path.join(SCAFFOLD_DIR, 'scaffold.config.json');
 const SERVICE_PREFIX = 'mf-';
+// Written by every build_app `.env` heredoc; extra keys cannot repeat them.
+const BASE_ENV_KEYS = ['NODE_ENV', 'API_URL', 'ENTITY_ROOT', 'SECRET_KEY'];
+const ENV_KEY_PATTERN = /^[A-Z][A-Z0-9_]*$/;
 
 function printUsage() {
   console.log(`Usage:
@@ -25,6 +28,9 @@ Options:
 Per-token overrides (only for a repo that deviates from the pattern):
   --service-name=  --container-name=  --compose-image-var=  --runner-tag=
   --compose-base-dev=  --compose-base-qa=  --compose-base-preprod=  --npm-project-id=
+
+Fork-specific build variables (values come from GitLab CI/CD variables of the same name):
+  --extra-env-keys=KEY[,KEY]   Extra KEY=$KEY lines in build_app's .env heredoc.
 
 Example:
   node scaffold/generate.js --service=mf-virtual-office --target=../frontvirtualoffice --dry-run`);
@@ -68,10 +74,25 @@ function derive(service, shared, overrides = {}) {
       overrides['compose-image-var'] ??
       `FRONT_${bare.toUpperCase().replace(/-/g, '_')}_IMAGE_COMMIT`,
     CONTAINER_NAME: overrides['container-name'] ?? service,
+    EXTRA_ENV_LINES: extraEnvLines(overrides['extra-env-keys']),
     NEOCORE_NPM_PROJECT_ID: overrides['npm-project-id'] ?? shared.npmProjectId,
     RUNNER_TAG: overrides['runner-tag'] ?? shared.runnerTag,
     SERVICE_NAME: overrides['service-name'] ?? service,
   };
+}
+
+// `ZOHO_URL,ZOHO_ORG_ID` -> ['ZOHO_URL=$ZOHO_URL', 'ZOHO_ORG_ID=$ZOHO_ORG_ID'].
+function extraEnvLines(csv = '') {
+  const keys = csv
+    .split(',')
+    .map((key) => key.trim())
+    .filter(Boolean);
+  keys.forEach((key, index) => {
+    if (!ENV_KEY_PATTERN.test(key)) throw new Error(`invalid extra env key "${key}"`);
+    if (BASE_ENV_KEYS.includes(key)) throw new Error(`"${key}" is already written by the template`);
+    if (keys.indexOf(key) !== index) throw new Error(`duplicated extra env key "${key}"`);
+  });
+  return keys.map((key) => `${key}=$${key}`);
 }
 
 // CRLF -> LF so the output does not depend on the checkout's line endings.
@@ -80,10 +101,19 @@ function toLf(content) {
 }
 
 // Only known tokens are replaced: other `{{...}}` (e.g. docker --format) stay.
+// A list token must sit alone on its line: it expands to one line per item
+// with the same indentation, and an empty list removes the line.
 function substituteTokens(template, tokens) {
   let result = template;
   for (const [token, value] of Object.entries(tokens)) {
-    result = result.split(`{{${token}}}`).join(value);
+    if (Array.isArray(value)) {
+      const line = new RegExp(`^([ \\t]*)\\{\\{${token}\\}\\}\\n`, 'gm');
+      result = result.replace(line, (_match, indent) =>
+        value.map((item) => `${indent}${item}\n`).join(''),
+      );
+    } else {
+      result = result.split(`{{${token}}}`).join(value);
+    }
   }
   return result;
 }
@@ -119,6 +149,7 @@ const OVERRIDE_FLAGS = [
   'compose-base-qa',
   'compose-base-preprod',
   'npm-project-id',
+  'extra-env-keys',
 ];
 
 function fail(message) {
@@ -148,6 +179,11 @@ function main() {
   const overrides = {};
   for (const flag of OVERRIDE_FLAGS) {
     if (typeof args[flag] === 'string') overrides[flag] = args[flag];
+  }
+  try {
+    derive(service, readConfig().shared, overrides);
+  } catch (error) {
+    fail(error.message);
   }
 
   const onlyIds =

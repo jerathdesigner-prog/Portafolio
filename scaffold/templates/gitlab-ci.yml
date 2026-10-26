@@ -241,12 +241,14 @@ build_app:
   script:
     # Values come from environment-scoped CI/CD variables. The file is never
     # printed nor published as an artifact: it contains SECRET_KEY.
+    # Fork-specific keys: regenerate with --extra-env-keys=KEY[,KEY].
     - |
       cat > .env << EOF
       NODE_ENV=$NODE_ENV
       API_URL=$API_URL
       ENTITY_ROOT=$ENTITY_ROOT
       SECRET_KEY=$SECRET_KEY
+      {{EXTRA_ENV_LINES}}
       EOF
     - bun run build
     - test -f dist/browser/remoteEntry.json

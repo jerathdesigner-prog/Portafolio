@@ -246,6 +246,7 @@ build_app:
   script:
     # Values come from environment-scoped CI/CD variables. The file is never
     # printed nor published as an artifact: it contains SECRET_KEY.
+    # Fork-specific keys: regenerate with --extra-env-keys=KEY[,KEY].
     - |
       cat > .env << EOF
       NODE_ENV=$NODE_ENV

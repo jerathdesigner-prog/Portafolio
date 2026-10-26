@@ -23,7 +23,8 @@ scope: most red states are one of these categories.
 - Template base + fork-specific variables. `SECRET_KEY` must equal the host's; `API_URL` and
   `ENTITY_ROOT` are required; `NODE_ENV` is `DEV`/`PROD`.
 - A fork-specific variable must exist in `.env.example`, in `load-env.js` (`readBaseConfig` and the
-  generated interface) and in `.gitlab-ci.yml`'s `build_app` `.env` heredoc. Missing one makes a
+  generated interface) and in `.gitlab-ci.yml`'s `build_app` `.env` heredoc — the latter by
+  regenerating with `--extra-env-keys=KEY[,KEY]`, never by hand. Missing one makes a
   fresh CI build differ from local.
 - `.gitlab-ci.yml` is generated: resolve it by regenerating, never by hand —
   `node scaffold/generate.js --service=<mf-name> --target=. --force` (overrides such as

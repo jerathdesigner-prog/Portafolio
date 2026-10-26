@@ -71,3 +71,39 @@ test('every template token is resolved', () => {
     assert.ok(!output.includes(`{{${token}}}`), `unresolved {{${token}}}`);
   }
 });
+
+test('extra env keys become lines of the build_app .env heredoc', () => {
+  const file = readConfig().files.find((entry) => entry.id === 'gitlab-ci');
+  const output = render(file, 'mf-zoho', '.', { 'extra-env-keys': 'ZOHO_URL,ZOHO_ORG_ID' });
+
+  assert.match(
+    output,
+    /\n {6}SECRET_KEY=\$SECRET_KEY\n {6}ZOHO_URL=\$ZOHO_URL\n {6}ZOHO_ORG_ID=\$ZOHO_ORG_ID\n {6}EOF\n/,
+  );
+  assert.match(output, /--extra-env-keys=ZOHO_URL,ZOHO_ORG_ID --force$/m);
+});
+
+test('without extra env keys the heredoc keeps only the base variables', () => {
+  const file = readConfig().files.find((entry) => entry.id === 'gitlab-ci');
+  const output = render(file, 'mf-template', '.');
+
+  assert.match(output, /\n {6}SECRET_KEY=\$SECRET_KEY\n {6}EOF\n/);
+  assert.ok(!output.includes('EXTRA_ENV_LINES'));
+});
+
+test('derive rejects invalid or duplicated extra env keys', () => {
+  const { shared } = readConfig();
+
+  assert.throws(
+    () => derive('mf-zoho', shared, { 'extra-env-keys': 'zoho-url' }),
+    /invalid extra env key "zoho-url"/,
+  );
+  assert.throws(
+    () => derive('mf-zoho', shared, { 'extra-env-keys': 'API_URL' }),
+    /"API_URL" is already written/,
+  );
+  assert.throws(
+    () => derive('mf-zoho', shared, { 'extra-env-keys': 'A_KEY,A_KEY' }),
+    /duplicated extra env key "A_KEY"/,
+  );
+});

@@ -39,6 +39,8 @@ detection + gates) → build → docker → deploy`, on `main`, `development`, `
   (see [`scaffold/README.md`](../scaffold/README.md)). Per-repo values (`SERVICE_NAME`,
   `CONTAINER_NAME`, `COMPOSE_IMAGE_VAR`, `COMPOSE_FILE_*`, `RUNNER_TAG`) derive from `--service`;
   `scripts/gitlab-ci-scaffold.test.js` fails when the committed file drifts from the template.
+  Fork-specific build variables go into `build_app`'s `.env` with `--extra-env-keys=KEY[,KEY]`
+  (values are GitLab CI/CD variables of the same name).
 - Environment-scoped CI/CD variables: `API_URL`, `SECRET_KEY`, `ENTITY_ROOT`, `NODE_ENV`,
   `DEPLOY_HOST_DEV|QA|PREPROD`, `DEPLOY_SSH_PRIVATE_KEY`.
 - `.npmrc` for `@neocore/*` is generated with `CI_JOB_TOKEN`; the project must be in the job-token

@@ -27,6 +27,11 @@ node scaffold/generate.js --service=<mf-name> --target=<path> [options]
 | `RUNNER_TAG`                | `shared.runnerTag`                                       | `--runner-tag=`           |
 | `NEOCORE_NPM_PROJECT_ID`    | `shared.npmProjectId` (libcomponents registry)           | `--npm-project-id=`       |
 
+Fork-specific build variables: `--extra-env-keys=ZOHO_URL,ZOHO_ORG_ID` adds `ZOHO_URL=$ZOHO_URL`
+(one line per key) to `build_app`'s `.env` heredoc. Keys are `UPPER_SNAKE_CASE`, unique, and cannot
+repeat the base ones (`NODE_ENV`, `API_URL`, `ENTITY_ROOT`, `SECRET_KEY`); the values are GitLab
+CI/CD variables with the same name.
+
 Overrides are for repos whose server compose deviates from the pattern (e.g. frontcontainer:
 `--service=mf-container --service-name=container`). They are recorded in the generated banner's
 `Regenerate:` command, so that line alone reproduces the file.
