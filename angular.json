@@ -104,6 +104,7 @@
           "defaultConfiguration": "development",
           "options": {
             "port": 4250,
+            "hmr": true,
             "headers": {
               "Access-Control-Allow-Origin": "*"
             }
