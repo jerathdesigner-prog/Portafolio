@@ -13,6 +13,8 @@
  *
  * Flags (environment variables):
  *   SKIP_ENV_FETCH=1        skip the remote call (used by `bun run test`).
+ *   --example               read only .env.example, never .env (used by `bun run test`,
+ *                           so tests do not depend on the developer's local .env).
  *   ENV_FETCH_TIMEOUT_MS    remote call timeout, default 5000.
  *   NODE_ENV=DEV|PROD       sets `environment.production` (default DEV).
  */
@@ -49,7 +51,15 @@ const mask = (value) => {
   return `${value.slice(0, 2)}***${value.slice(-2)} (len=${value.length})`;
 };
 
+const USE_EXAMPLE = process.argv.includes('--example');
+
 function loadDotenv() {
+  if (USE_EXAMPLE) {
+    log.info('--example: reading .env.example only (.env is ignored).');
+    // No override: real environment variables (CI) still win over the example.
+    dotenv.config({ path: ENV_EXAMPLE_FILE, quiet: true });
+    return;
+  }
   if (fs.existsSync(ENV_FILE)) {
     // Standard dotenv precedence: variables already set in the process (CI job
     // variables, `SECRET_KEY=... bun run build`) win over the .env file.

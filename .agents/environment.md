@@ -14,6 +14,8 @@ with no manual step.
 4. Optional remote config: `GET ${API_URL}/ms-core/parameter/env` (`data` object). Extra keys are
    added as optional properties. Best-effort: on failure/timeout the build continues with the
    values above and prints a warning. `SKIP_ENV_FETCH=1` skips it (tests do).
+   Tests also run `load-env.js --example`: they read only `.env.example`, so a missing or
+   personalized `.env` never breaks `bun run test` (process/CI variables still win).
 
 ## Variables
 
