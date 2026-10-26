@@ -1,11 +1,15 @@
 import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
+
 import { PubSubService } from '../../../../shared/services/pubsub.service';
 import { TemplateService } from '../../services/template.service';
 import { TemplateListPage } from './template-list.page';
 
 describe('TemplateListPage', () => {
-  const pubsub = { loading: vi.fn(), error: vi.fn() };
+  const pubsub = {
+    loading: vi.fn<PubSubService['loading']>(),
+    error: vi.fn<PubSubService['error']>(),
+  };
 
   async function render(list: TemplateService['list']) {
     await TestBed.configureTestingModule({
@@ -24,7 +28,7 @@ describe('TemplateListPage', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('loads the first page and renders the records', async () => {
-    const list = vi.fn(() =>
+    const list = vi.fn<TemplateService['list']>(() =>
       of({
         data: {
           records: [{ id: 1, name: 'First', status: true }],
@@ -45,7 +49,9 @@ describe('TemplateListPage', () => {
   });
 
   it('shows the error state and notifies the host when loading fails', async () => {
-    const element = await render(vi.fn(() => throwError(() => new Error('boom'))));
+    const element = await render(
+      vi.fn<TemplateService['list']>(() => throwError(() => new Error('boom'))),
+    );
 
     expect(element.querySelector('[role="alert"]')).not.toBeNull();
     expect(pubsub.error).toHaveBeenCalledOnce();

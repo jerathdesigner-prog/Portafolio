@@ -5,6 +5,8 @@ of [`AGENTS.md`](../AGENTS.md) here with what exists only in your fork, using th
 On a merge from `front-template` this file always keeps the fork's version.
 
 <!-- capability-map:start -->
+
 | If you need… | Already exists | Entry point | Read |
-|---|---|---|---|
+| ------------ | -------------- | ----------- | ---- |
+
 <!-- capability-map:end -->

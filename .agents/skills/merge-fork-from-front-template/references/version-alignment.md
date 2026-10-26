@@ -22,14 +22,14 @@ curl -s http://localhost:<fork-port>/remoteEntry.json | node -e "..."   # same
 
 The template's current pins (the host must match):
 
-| Package | Version |
-|---|---|
-| `@angular/*` (core, common, compiler, forms, platform-browser, router, animations, cdk) | 22.2.1 |
-| `@angular/build`, `@angular/cli`, `@angular/compiler-cli`, `@angular/localize` | 22.2.1 |
-| `@angular-architects/native-federation` | 22.2.2 |
-| `typescript` | ~6.0.3 |
-| `rxjs` | ~7.8.2 |
-| `zone.js` | 0.16.x |
+| Package                                                                                 | Version |
+| --------------------------------------------------------------------------------------- | ------- |
+| `@angular/*` (core, common, compiler, forms, platform-browser, router, animations, cdk) | 22.2.1  |
+| `@angular/build`, `@angular/cli`, `@angular/compiler-cli`, `@angular/localize`          | 22.2.1  |
+| `@angular-architects/native-federation`                                                 | 22.2.2  |
+| `typescript`                                                                            | ~6.0.3  |
+| `rxjs`                                                                                  | ~7.8.2  |
+| `zone.js`                                                                               | 0.16.x  |
 
 Exact pins (`22.2.1`, never `^22.2.1`/`~22.2.1`) on `@angular/*`, `@angular/build`, `@angular/cli`,
 `@angular-architects/native-federation`. The Angular packages declare exact peer dependencies on

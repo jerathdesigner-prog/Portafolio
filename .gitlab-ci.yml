@@ -32,25 +32,27 @@ default:
 
 variables:
   # ---- Per-repo values (edit in each fork) --------------------------------
-  RUNNER_TAG: "nc_core"
+  RUNNER_TAG: 'nc_core'
   # Service key in the server compose (docker compose up <SERVICE_NAME>).
-  SERVICE_NAME: "mf-template"
+  SERVICE_NAME: 'mf-template'
   # container_name in the server compose (used only by the docker ps check).
-  CONTAINER_NAME: "mf-template"
+  CONTAINER_NAME: 'mf-template'
   # Variable the server compose reads for the image:
   #   image: ${FRONT_TEMPLATE_IMAGE_COMMIT:-<registry>/mf-template:<channel>}
-  COMPOSE_IMAGE_VAR: "FRONT_TEMPLATE_IMAGE_COMMIT"
-  COMPOSE_FILE_DEV: "/root/neocore/FRONTEND-NEOCORE/docker/mf-template.yml"
-  COMPOSE_FILE_QA: "/root/citytech/neocore/FRONTEND/docker/mf-template.yml"
-  COMPOSE_FILE_PREPROD: "/root/easycore/neo-core/FRONTEND/docker/mf-template.yml"
+  COMPOSE_IMAGE_VAR: 'FRONT_TEMPLATE_IMAGE_COMMIT'
+  COMPOSE_FILE_DEV: '/root/neocore/FRONTEND-NEOCORE/docker/mf-template.yml'
+  COMPOSE_FILE_QA: '/root/citytech/neocore/FRONTEND/docker/mf-template.yml'
+  COMPOSE_FILE_PREPROD: '/root/easycore/neo-core/FRONTEND/docker/mf-template.yml'
   # ---- Shared values -------------------------------------------------------
   # Keep bun's download cache inside the project so `cache:` can capture it.
-  BUN_INSTALL_CACHE_DIR: "$CI_PROJECT_DIR/.bun-cache"
-  BUN_IMAGE: "oven/bun:1.4.2-slim"
+  BUN_INSTALL_CACHE_DIR: '$CI_PROJECT_DIR/.bun-cache'
+  # BUN_VERSION / NODE_MAJOR are NOT set here: `resolve_versions` reads them
+  # from `.bun-version` / `.node-version` (single source of truth, same as
+  # backtemplate) and every job gets them through its dotenv artifact.
 
 # Two caches: a stable download store, and node_modules keyed by bun.lock.
 .bun_store_cache: &bun_store_cache
-  key: "bun-store"
+  key: 'bun-store'
   paths:
     - .bun-cache/
 
@@ -68,8 +70,26 @@ variables:
   - echo "@neocore:registry=https://gitads.aseguradoradelsur.com/api/v4/projects/140/packages/npm/" > .npmrc
   - echo "//gitads.aseguradoradelsur.com/api/v4/projects/140/packages/npm/:_authToken=${CI_JOB_TOKEN}" >> .npmrc
 
+# Reads the tool versions from the repo files (same job as backtemplate).
+# `.node-version` is a full semver; the Node images are tagged by major.
+resolve_versions:
+  stage: .pre
+  image: alpine:3.20
+  variables:
+    GIT_DEPTH: '1'
+  script:
+    - echo "BUN_VERSION=$(tr -d '[:space:]' < .bun-version)" > versions.env
+    - NODE_VERSION="$(tr -d '[:space:]' < .node-version)"
+    - echo "NODE_MAJOR=${NODE_VERSION%%.*}" >> versions.env
+    - cat versions.env
+  artifacts:
+    reports:
+      dotenv: versions.env
+
 .bun_job:
-  image: $BUN_IMAGE
+  image: oven/bun:${BUN_VERSION}-slim
+  needs:
+    - job: resolve_versions
   cache:
     - <<: *bun_store_cache
       policy: pull
@@ -93,18 +113,45 @@ install_deps:
     - echo "bun $(bun -v) / node $(bun -e 'console.log(process.version)')"
     - echo "Dependencies installed"
 
-run_tests:
-  extends: .bun_job
+# Tests run on Node (not Bun), like backtemplate: the Angular unit-test
+# builder and node:test run under the same runtime the developers use. Bun is
+# only used to install dependencies (reuses the lockfile/store cache).
+# Intentionally NOT `needs: install_deps` (it only warms the cache for future
+# pipelines): lint, format and tests start right after `resolve_versions`.
+.test_base:
   stage: test
+  image: node:${NODE_MAJOR}-slim
+  cache:
+    - <<: *bun_store_cache
+      policy: pull
+    - <<: *bun_modules_cache
+      policy: pull
+  before_script:
+    - *npmrc_setup
+    - npm install -g bun@${BUN_VERSION}
+    - bun install --frozen-lockfile --ignore-scripts
+  needs:
+    - job: resolve_versions
+
+lint:
+  extends: .test_base
+  script:
+    - npm run lint
+
+format:check:
+  extends: .test_base
+  script:
+    - npm run format:check
+
+test:unit:
+  extends: .test_base
   variables:
     # Unit tests only need the base environment file, not the remote config.
-    SKIP_ENV_FETCH: "1"
+    SKIP_ENV_FETCH: '1'
   script:
-    - bun run lint
-    - bun run test
-  needs:
-    - job: install_deps
-      artifacts: false
+    # Angular unit tests (vitest) + node:test for scripts/ (incl. the
+    # .node-version/.bun-version guard).
+    - npm run test
 
 semgrep-sast:
   stage: security
@@ -121,7 +168,7 @@ secret_detection:
   stage: security
   dependencies: []
   variables:
-    SECRET_DETECTION_EXCLUDED_PATHS: ".npmrc"
+    SECRET_DETECTION_EXCLUDED_PATHS: '.npmrc'
   allow_failure: false
   artifacts:
     when: always
@@ -169,9 +216,9 @@ secret_detection_gate:
     - job: secret_detection
       artifacts: true
   variables:
-    GATE_TITLE: "SECRET DETECTION"
-    REPORT_FILE: "gl-secret-detection-report.json"
-    FAIL_SEVERITIES: "Critical,High,Medium,Low,Info,Unknown"
+    GATE_TITLE: 'SECRET DETECTION'
+    REPORT_FILE: 'gl-secret-detection-report.json'
+    FAIL_SEVERITIES: 'Critical,High,Medium,Low,Info,Unknown'
 
 semgrep_sast_gate:
   extends: .security_gate
@@ -179,9 +226,9 @@ semgrep_sast_gate:
     - job: semgrep-sast
       artifacts: true
   variables:
-    GATE_TITLE: "SEMGREP SAST"
-    REPORT_FILE: "gl-sast-report.json"
-    FAIL_SEVERITIES: "Critical,High"
+    GATE_TITLE: 'SEMGREP SAST'
+    REPORT_FILE: 'gl-sast-report.json'
+    FAIL_SEVERITIES: 'Critical,High'
 
 build_app:
   extends: .bun_job
@@ -206,9 +253,12 @@ build_app:
       - dist/
     expire_in: 2 hours
   needs:
-    - job: install_deps
+    - job: resolve_versions
+    - job: lint
       artifacts: false
-    - job: run_tests
+    - job: format:check
+      artifacts: false
+    - job: test:unit
       artifacts: false
     - job: semgrep_sast_gate
       artifacts: false
@@ -221,7 +271,7 @@ build_image:
   services:
     - docker:25.0.3-dind
   variables:
-    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_TLS_CERTDIR: '/certs'
     DOCKER_DRIVER: overlay2
   before_script:
     - apk add --no-cache jq >/dev/null
@@ -242,6 +292,7 @@ build_image:
       # DIST_STAGE=prebuilt reuses dist/ from build_app instead of rebuilding.
       docker build --target runtime \
         --build-arg DIST_STAGE=prebuilt \
+        --build-arg BUN_VERSION="$BUN_VERSION" \
         --build-arg VERSION="$VERSION" \
         -t "$IMAGE_COMMIT" -t "$IMAGE_CHANNEL" .
       docker push "$IMAGE_COMMIT"
@@ -252,6 +303,7 @@ build_image:
       dotenv: variables.env
     expire_in: 1 day
   needs:
+    - job: resolve_versions
     - job: build_app
       artifacts: true
   retry:
@@ -268,9 +320,9 @@ build_image:
   stage: deploy
   image: alpine:latest
   variables:
-    DEPLOY_USER: "root"
-    DEPLOY_SSH_PORT: "22"
-    RESTART_NGINX: "false"
+    DEPLOY_USER: 'root'
+    DEPLOY_SSH_PORT: '22'
+    RESTART_NGINX: 'false'
   before_script:
     - apk add --no-cache openssh-client
     - mkdir -p ~/.ssh && chmod 700 ~/.ssh
@@ -313,8 +365,8 @@ deploy:development:
   environment:
     name: development
   variables:
-    DEPLOY_HOST: "$DEPLOY_HOST_DEV"
-    COMPOSE_FILE: "$COMPOSE_FILE_DEV"
+    DEPLOY_HOST: '$DEPLOY_HOST_DEV'
+    COMPOSE_FILE: '$COMPOSE_FILE_DEV'
   rules:
     - if: '$CI_COMMIT_BRANCH == "development"'
 
@@ -323,8 +375,8 @@ deploy:quality:
   environment:
     name: quality
   variables:
-    DEPLOY_HOST: "$DEPLOY_HOST_QA"
-    COMPOSE_FILE: "$COMPOSE_FILE_QA"
+    DEPLOY_HOST: '$DEPLOY_HOST_QA'
+    COMPOSE_FILE: '$COMPOSE_FILE_QA'
   rules:
     - if: '$CI_COMMIT_BRANCH == "quality"'
 
@@ -333,9 +385,9 @@ deploy:pre-production:
   environment:
     name: pre-production
   variables:
-    DEPLOY_HOST: "$DEPLOY_HOST_PREPROD"
-    COMPOSE_FILE: "$COMPOSE_FILE_PREPROD"
+    DEPLOY_HOST: '$DEPLOY_HOST_PREPROD'
+    COMPOSE_FILE: '$COMPOSE_FILE_PREPROD'
     # nginx reverse-proxies pre-production; restart it to re-resolve upstreams.
-    RESTART_NGINX: "true"
+    RESTART_NGINX: 'true'
   rules:
     - if: '$CI_COMMIT_BRANCH == "pre-production"'

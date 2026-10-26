@@ -8,7 +8,7 @@ with no manual step.
 ## Sources and precedence
 
 1. Variables already set in the process (CI job variables, `SECRET_KEY=... bun run build`).
-2. `.env` (created from `.env.example` by `bun install` via `scripts/prepare-env.js`; never
+2. `.env` (created from `.env.example` by `bun install` via `prepare.js` → `scripts/prepare-env.js`; never
    overwritten — new defaults go to `.env.ignore` for diffing).
 3. `.env.example`, only when `.env` does not exist (prints a warning).
 4. Optional remote config: `GET ${API_URL}/ms-core/parameter/env` (`data` object). Extra keys are
@@ -17,14 +17,14 @@ with no manual step.
 
 ## Variables
 
-| Variable | Required | Notes |
-|---|---|---|
-| `API_URL` | yes | Gateway base URL, validated as URL → `environment.apiUrl` |
-| `SECRET_KEY` | yes | ≥ 10 chars, **identical to the host** → `environment.secretKey` |
-| `ENTITY_ROOT` | yes | Root entity code → `environment.entityRoot` |
-| `NODE_ENV` | no | `DEV` (default) or `PROD` → `environment.production` |
-| `SKIP_ENV_FETCH` | no | `1` skips the remote config call |
-| `ENV_FETCH_TIMEOUT_MS` | no | Remote call timeout, default 5000 |
+| Variable               | Required | Notes                                                           |
+| ---------------------- | -------- | --------------------------------------------------------------- |
+| `API_URL`              | yes      | Gateway base URL, validated as URL → `environment.apiUrl`       |
+| `SECRET_KEY`           | yes      | ≥ 10 chars, **identical to the host** → `environment.secretKey` |
+| `ENTITY_ROOT`          | yes      | Root entity code → `environment.entityRoot`                     |
+| `NODE_ENV`             | no       | `DEV` (default) or `PROD` → `environment.production`            |
+| `SKIP_ENV_FETCH`       | no       | `1` skips the remote config call                                |
+| `ENV_FETCH_TIMEOUT_MS` | no       | Remote call timeout, default 5000                               |
 
 ## Why SECRET_KEY must match the host
 

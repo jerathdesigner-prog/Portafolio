@@ -10,15 +10,15 @@ bun run generate:module -- --name=user-profile --expose   # module + exposed to 
 
 ## Layout
 
-| Path | Role |
-|---|---|
-| `template.routes.ts` | `TemplateRoutes: Routes` — the exposed entry. No HttpClient providers: hosted requests use the host's interceptors |
-| `pages/template-list/` | Container page: signals state, calls the service, publishes PubSub topics to the host |
-| `components/template-table/` | Presentational component: `input()`/`output()` only, no services |
-| `services/template.service.ts` | HTTP calls: `${environment.apiUrl}/${MsPrefixEnum.CORE}/template` + permission headers |
-| `interfaces/` | Request/response types of this module |
-| `enums/template-action.enum.ts` | Permission resource and actions (`x-api-key: template:listar`) |
-| `constants/` | Module constants (page size, etc.) |
+| Path                            | Role                                                                                                               |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `template.routes.ts`            | `TemplateRoutes: Routes` — the exposed entry. No HttpClient providers: hosted requests use the host's interceptors |
+| `pages/template-list/`          | Container page: signals state, calls the service, publishes PubSub topics to the host                              |
+| `components/template-table/`    | Presentational component: `input()`/`output()` only, no services                                                   |
+| `services/template.service.ts`  | HTTP calls: `${environment.apiUrl}/${MsPrefixEnum.CORE}/template` + permission headers                             |
+| `interfaces/`                   | Request/response types of this module                                                                              |
+| `enums/template-action.enum.ts` | Permission resource and actions (`x-api-key: template:listar`)                                                     |
+| `constants/`                    | Module constants (page size, etc.)                                                                                 |
 
 ## Rules this module demonstrates
 

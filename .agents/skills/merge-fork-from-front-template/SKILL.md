@@ -1,10 +1,10 @@
 ---
 name: merge-fork-from-front-template
-description: "Trigger: merge front-template, sync fork with front-template, traer cambios de front-template, resolver conflictos front-template. Real git merge from front-template into a Neocore Angular micro-frontend fork, then make the fork run like the template (Native Federation, strict Angular singletons, bun scripts) without changing its route/module contracts."
+description: 'Trigger: merge front-template, sync fork with front-template, traer cambios de front-template, resolver conflictos front-template. Real git merge from front-template into a Neocore Angular micro-frontend fork, then make the fork run like the template (Native Federation, strict Angular singletons, bun scripts) without changing its route/module contracts.'
 license: Apache-2.0
 metadata:
-  author: "maciasl"
-  version: "1.0"
+  author: 'maciasl'
+  version: '1.0'
 ---
 
 ## Activation Contract
@@ -88,45 +88,45 @@ NOT rewritten to the template's standalone style; only their host integration is
 
 ## Decision Gates
 
-| File category | Resolution |
-|---|---|
-| `src/app/modules/<feature>/**` (fork business: wallet, public-payment, ...) | `--ours`, untouched |
-| `src/app/modules/template/**` | `--theirs`, reference module kept |
-| `src/app/shared/**` (storage, pubsub, auth interceptor, response types, enums, providers, helpers) | Template structure + fork-only members by hand; run tests |
-| `app.config.ts`, `app.routes.ts`, `bootstrap.ts`, `main.ts` | Merge both: adopt the template NF bootstrap and `provideMfHttpClient()`; keep the fork's routes/providers |
-| `federation.config.mjs` | Template policy + fork `name`/`exposes`; keep extra shared deps loose (e.g. `@neocore/lib-components`) |
-| `tsconfig.federation.json` | Union of exposed files |
-| `angular.json` | Template targets/builders/polyfills; fork project name, port, assets/styles |
-| `package.json` | Template versions for Angular/NF/tooling; fork `name`/`version`/extra deps; `bun install` regenerates the lock |
-| `scripts/**`, `load-env.js`, `biome.jsonc`, `bunfig.toml`, `.editorconfig`, `.mcp.json`, `.vscode/**`, `public/**` | Template; keep fork-specific env fields, ignores and aliases |
-| `Dockerfile`, `nginx.conf`, `compose.yml`, `.dockerignore` | Template structure + fork service names/ports/env; keep `/health` |
-| `.gitignore` | Union; fork entries win |
-| `.env.example` | Template + fork-specific variables |
-| `.gitlab-ci.yml` | Template + re-apply the fork's top `variables:` block and engine-specific jobs |
-| `AGENTS.md` | Template; fork-only capabilities in `.agents/capabilities.local.md` |
-| `.agents/capabilities.local.md` | Fork |
-| `.agents/*.md` | Template (host-integration, architecture, testing, environment, deployment, merge doc) |
-| `README.md` | Template base + fork-specific URLs/ports/module list |
-| `src/index.html`, `src/styles.scss` | Template structure + fork branding/styles; never drop the fork's design system |
-| Generated (`src/environments/*`, `bun.lock`, host `container.json(c)`) | Re-run generator/`bun install`; never hand-merge |
-| Version files (`.node-version`, `.bun-version`) | Fork values win (CI reads them) |
+| File category                                                                                                      | Resolution                                                                                                     |
+| ------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| `src/app/modules/<feature>/**` (fork business: wallet, public-payment, ...)                                        | `--ours`, untouched                                                                                            |
+| `src/app/modules/template/**`                                                                                      | `--theirs`, reference module kept                                                                              |
+| `src/app/shared/**` (storage, pubsub, auth interceptor, response types, enums, providers, helpers)                 | Template structure + fork-only members by hand; run tests                                                      |
+| `app.config.ts`, `app.routes.ts`, `bootstrap.ts`, `main.ts`                                                        | Merge both: adopt the template NF bootstrap and `provideMfHttpClient()`; keep the fork's routes/providers      |
+| `federation.config.mjs`                                                                                            | Template policy + fork `name`/`exposes`; keep extra shared deps loose (e.g. `@neocore/lib-components`)         |
+| `tsconfig.federation.json`                                                                                         | Union of exposed files                                                                                         |
+| `angular.json`                                                                                                     | Template targets/builders/polyfills; fork project name, port, assets/styles                                    |
+| `package.json`                                                                                                     | Template versions for Angular/NF/tooling; fork `name`/`version`/extra deps; `bun install` regenerates the lock |
+| `scripts/**`, `load-env.js`, `oxlint.config.mts`, `oxfmt.config.mts`, `.husky/**`, `.node-version`, `.bun-version`, `bunfig.toml`, `.editorconfig`, `.mcp.json`, `.vscode/**`, `public/**` | Template; keep fork-specific env fields, ignores and aliases                                                   |
+| `Dockerfile`, `nginx.conf`, `compose.yml`, `.dockerignore`                                                         | Template structure + fork service names/ports/env; keep `/health`                                              |
+| `.gitignore`                                                                                                       | Union; fork entries win                                                                                        |
+| `.env.example`                                                                                                     | Template + fork-specific variables                                                                             |
+| `.gitlab-ci.yml`                                                                                                   | Template + re-apply the fork's top `variables:` block and engine-specific jobs                                 |
+| `AGENTS.md`                                                                                                        | Template; fork-only capabilities in `.agents/capabilities.local.md`                                            |
+| `.agents/capabilities.local.md`                                                                                    | Fork                                                                                                           |
+| `.agents/*.md`                                                                                                     | Template (host-integration, architecture, testing, environment, deployment, merge doc)                         |
+| `README.md`                                                                                                        | Template base + fork-specific URLs/ports/module list                                                           |
+| `src/index.html`, `src/styles.scss`                                                                                | Template structure + fork branding/styles; never drop the fork's design system                                 |
+| Generated (`src/environments/*`, `bun.lock`, host `container.json(c)`)                                             | Re-run generator/`bun install`; never hand-merge                                                               |
+| Version files (`.node-version`, `.bun-version`)                                                                    | Fork values win (CI reads them)                                                                                |
 
 ## Execution Steps
 
 1. **Inspect / set up.**
    a. If `git rev-parse --verify MERGE_HEAD` succeeds, a merge is already in progress: record
-      `MERGE_HEAD`, list `git diff --name-only --diff-filter=U`, and continue at step 2. Do not
-      abort, do not start a second merge.
+   `MERGE_HEAD`, list `git diff --name-only --diff-filter=U`, and continue at step 2. Do not
+   abort, do not start a second merge.
    b. Otherwise: `git status` must be clean; if not, STOP and report (never stash on your own). Cut
-      `sync/front-template-base` from the fork's integration branch (`pre-production` by default,
-      or the branch the user named). `git remote add front-template
+   `sync/front-template-base` from the fork's integration branch (`pre-production` by default,
+   or the branch the user named). `git remote add front-template
       https://gitads.aseguradoradelsur.com/neocore/core/front-template.git` if missing, then
-      `git fetch front-template`. Default upstream `front-template/rama`; verify the branch
-      actually contains the expected change before merging.
+   `git fetch front-template`. Default upstream `front-template/rama`; verify the branch
+   actually contains the expected change before merging.
    c. Record `PRE_MERGE_SHA=$(git rev-parse HEAD)`.
    d. Start `git merge front-template/rama --allow-unrelated-histories --no-commit --no-ff`
-      (first merge) or `git merge front-template/<branch> --no-commit --no-ff`. Never
-      `--continue`/commit.
+   (first merge) or `git merge front-template/<branch> --no-commit --no-ff`. Never
+   `--continue`/commit.
 2. **Resolve conflicts per the Decision Gates.** Read both sides (`git show :2:<path>` for ours,
    `:3:<path>` for theirs) on every tooling/config/shared conflict and write the union yourself.
    Do not blind-pick a whole side unless it is truly equivalent. Keep business modules untouched.

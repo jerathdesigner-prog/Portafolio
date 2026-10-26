@@ -19,16 +19,16 @@ and builds one route per row:
 
 Manifest row (one per exposed entry):
 
-| Field | Meaning |
-|---|---|
-| `name` | Title / breadcrumb |
-| `remoteEntry` | Public URL of this MF's `remoteEntry.json` |
-| `path` | Route path in the host; the exposed routes are mounted under it |
-| `exposedModule` | Exposed key **without** `./`, equal to the exported symbol |
-| `isAuthRoute` | `true` = authenticated layout + menu guard; `false` = public layout |
-| `moduleName` | Parent breadcrumb |
-| `typeRemote` | `module` for `Routes`/NgModule (`loadChildren`), `component` for a standalone component |
-| `guards` | Guard names resolved by the host |
+| Field           | Meaning                                                                                 |
+| --------------- | --------------------------------------------------------------------------------------- |
+| `name`          | Title / breadcrumb                                                                      |
+| `remoteEntry`   | Public URL of this MF's `remoteEntry.json`                                              |
+| `path`          | Route path in the host; the exposed routes are mounted under it                         |
+| `exposedModule` | Exposed key **without** `./`, equal to the exported symbol                              |
+| `isAuthRoute`   | `true` = authenticated layout + menu guard; `false` = public layout                     |
+| `moduleName`    | Parent breadcrumb                                                                       |
+| `typeRemote`    | `module` for `Routes`/NgModule (`loadChildren`), `component` for a standalone component |
+| `guards`        | Guard names resolved by the host                                                        |
 
 ## Exposes
 

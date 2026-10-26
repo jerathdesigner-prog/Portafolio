@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import type { Observable } from 'rxjs';
+
 import { environment } from '../../../../environments/environment';
 import { MsPrefixEnum } from '../../../shared/enums/ms-prefix.enum';
 import { buildPermissionHeaders } from '../../../shared/helpers/permission-headers.helper';

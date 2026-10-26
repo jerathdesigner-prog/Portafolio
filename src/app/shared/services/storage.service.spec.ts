@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { EncryptStorageNoble } from 'encrypt-storage';
+
 import { environment } from '../../../environments/environment';
 import { StorageEnum } from '../enums/storage.enum';
 import { StorageService } from './storage.service';

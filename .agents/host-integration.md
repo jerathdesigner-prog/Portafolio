@@ -32,16 +32,16 @@ Add one manifest row per exposed entry in ms-core (no host code change is needed
 }
 ```
 
-| Field | Meaning |
-|---|---|
-| `name` | Title and breadcrumb label |
-| `remoteEntry` | Public URL of this MF's `remoteEntry.json` (the host also accepts the old `remoteEntry.js` and rewrites it) |
-| `path` | Route path in the host; the exposed `Routes` are mounted under it |
-| `exposedModule` | Exposed key **without** `./`, equal to the exported symbol (`TemplateRoutes`) |
-| `isAuthRoute` | `true` = authenticated layout + menu guard |
-| `moduleName` | Parent breadcrumb |
-| `typeRemote` | `module` for a `Routes` array (`loadChildren`), `component` for a standalone component (`loadComponent`) |
-| `guards` | Guard names resolved by the host |
+| Field           | Meaning                                                                                                     |
+| --------------- | ----------------------------------------------------------------------------------------------------------- |
+| `name`          | Title and breadcrumb label                                                                                  |
+| `remoteEntry`   | Public URL of this MF's `remoteEntry.json` (the host also accepts the old `remoteEntry.js` and rewrites it) |
+| `path`          | Route path in the host; the exposed `Routes` are mounted under it                                           |
+| `exposedModule` | Exposed key **without** `./`, equal to the exported symbol (`TemplateRoutes`)                               |
+| `isAuthRoute`   | `true` = authenticated layout + menu guard                                                                  |
+| `moduleName`    | Parent breadcrumb                                                                                           |
+| `typeRemote`    | `module` for a `Routes` array (`loadChildren`), `component` for a standalone component (`loadComponent`)    |
+| `guards`        | Guard names resolved by the host                                                                            |
 
 ## Exposing a module
 
@@ -76,13 +76,13 @@ follows the same rule as frontcore:
 The host subscribes to these topics (`frontcontainer/src/app/app.component.ts`); use
 `PubSubService` / `PubSubTopic`, never raw strings:
 
-| Topic | Payload | Host reaction |
-|---|---|---|
-| `loading` | `boolean` | Global loader on/off |
-| `error` | message or error payload | Error toast |
-| `success` / `warning` / `info` | `string` | Toast |
-| `login-redirect` | `boolean` | Post-login navigation |
-| `clearBreadCrumb` | `boolean` | Clears the breadcrumb |
+| Topic                          | Payload                  | Host reaction         |
+| ------------------------------ | ------------------------ | --------------------- |
+| `loading`                      | `boolean`                | Global loader on/off  |
+| `error`                        | message or error payload | Error toast           |
+| `success` / `warning` / `info` | `string`                 | Toast                 |
+| `login-redirect`               | `boolean`                | Post-login navigation |
+| `clearBreadCrumb`              | `boolean`                | Clears the breadcrumb |
 
 `pubsub-js` is skipped from federation sharing (CommonJS shape), so every app bundles its own copy.
 The bus is still shared: pubsub-js registers itself on `window.PubSub` and a later copy reuses the
@@ -92,13 +92,13 @@ existing instance (it logs "PubSub already loaded, using existing version" — e
 
 Federation shares Angular, rxjs and tslib as `singleton + strictVersion`. The host currently runs:
 
-| Package | Version |
-|---|---|
-| `@angular/*` | 22.2.1 |
-| `@angular/build`, `@angular/cli` | 22.2.1 |
-| `@angular-architects/native-federation` | 22.2.2 |
-| `typescript` | ~6.0.3 |
-| `rxjs` | ~7.8.2 |
+| Package                                 | Version |
+| --------------------------------------- | ------- |
+| `@angular/*`                            | 22.2.1  |
+| `@angular/build`, `@angular/cli`        | 22.2.1  |
+| `@angular-architects/native-federation` | 22.2.2  |
+| `typescript`                            | ~6.0.3  |
+| `rxjs`                                  | ~7.8.2  |
 
 When the host upgrades Angular, upgrade this template in the same release train and propagate to
 the forks (see [`merge-changes-from-front-template.md`](merge-changes-from-front-template.md)).

@@ -4,10 +4,10 @@
 
 `Dockerfile` has three routes selected by `DIST_STAGE`:
 
-| `DIST_STAGE` | Used by | What happens |
-|---|---|---|
+| `DIST_STAGE`      | Used by               | What happens                                                                      |
+| ----------------- | --------------------- | --------------------------------------------------------------------------------- |
 | `build` (default) | local / `compose.yml` | `bun install` + `bun run build` inside the image (uses `.env`, or `.env.example`) |
-| `prebuilt` | CI `build_image` | copies `dist/` produced by `build_app` |
+| `prebuilt`        | CI `build_image`      | copies `dist/` produced by `build_app`                                            |
 
 Runtime: `nginx:alpine-slim`, non-root (`USER nginx` + `CAP_NET_BIND_SERVICE`), `tini` as PID 1,
 read-only served files, `HEALTHCHECK` on `/health`. Private `@neocore` packages in a local build:
@@ -23,8 +23,16 @@ unless the reverse proxy requires it.
 
 ## CI/CD (`.gitlab-ci.yml`)
 
-`install → test (lint + unit) → security (SAST, secret detection + gates) → build → docker → deploy`,
-on `main`, `development`, `quality`, `pre-production`.
+`resolve_versions → install → test (lint, format:check, test:unit) → security (SAST, secret
+detection + gates) → build → docker → deploy`, on `main`, `development`, `quality`, `pre-production`
+— same structure as backtemplate.
+
+- Node/Bun versions come from `.node-version` / `.bun-version`: `resolve_versions` publishes
+  `BUN_VERSION` and `NODE_MAJOR` (dotenv artifact). Bun jobs use `oven/bun:${BUN_VERSION}-slim`;
+  test jobs run on `node:${NODE_MAJOR}-slim` with `npm run` (Bun only installs);
+  `build_image` passes `--build-arg BUN_VERSION`. Never hardcode a version in the pipeline.
+- `lint`, `format:check` and `test:unit` start in parallel right after `resolve_versions`;
+  `install_deps` only warms the cache for later pipelines.
 
 - Per-repo values are in the top `variables:` block (`SERVICE_NAME`, `CONTAINER_NAME`,
   `COMPOSE_IMAGE_VAR`, `COMPOSE_FILE_*`, `RUNNER_TAG`); a fork edits only that block.

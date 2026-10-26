@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import PubSub from 'pubsub-js';
+
 import { PubSubTopic } from '../enums/pubsub-topic.enum';
 
 interface PublishOptions {

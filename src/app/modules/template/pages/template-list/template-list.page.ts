@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, type OnInit, signal } from '@angular/core';
 import { finalize } from 'rxjs';
+
 import { PubSubService } from '../../../../shared/services/pubsub.service';
 import { TemplateTableComponent } from '../../components/template-table/template-table.component';
 import { TEMPLATE_PAGE_SIZE } from '../../constants/template.constants';

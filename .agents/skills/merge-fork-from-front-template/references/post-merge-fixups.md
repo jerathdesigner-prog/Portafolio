@@ -97,8 +97,8 @@ Run from the fork root (explicit `NODE_ENV`, see `version-alignment.md`):
 bun install
 NODE_ENV=DEV SKIP_ENV_FETCH=1 bun run test     # @angular/build:unit-test + node --test scripts
 NODE_ENV=PROD SKIP_ENV_FETCH=1 bun run build   # federation build -> dist/browser/remoteEntry.json
-bun run lint                                   # biome
-bun run check                                  # biome lint + format + imports (verify)
+bun run lint                                   # oxlint
+bun run check                                  # oxlint + oxfmt --check (verify)
 ```
 
 Then:
@@ -117,19 +117,19 @@ Load an exposed route in the host and confirm the component/module renders with 
 
 ## Recurring failures
 
-| Symptom | Cause / fix |
-|---|---|
-| `NG0203 ... router duplicate forRoot guard` | Host/fork Angular versions differ (strict singleton). Align exact versions, `bun install`, restart `ng serve`, hard-reload the host. |
-| `NG0912` duplicate component IDs | Host and fork bundle the same library (`@ng-bootstrap`, `@angular/cdk`, `ngx-otp-input`). Usually warnings; not the blank-page cause. |
-| Route 404s although the manifest row exists | `exposedModule` ≠ exported symbol, expose missing from `tsconfig.federation.json`, wrong `typeRemote`, wrong `path`, or the remote dev server is down/CORS. Check `remoteEntry.json` exposes and the host router config. |
-| `HttpClient` not provided / interceptor bypassed in the host | The exposed route/module provides `provideHttpClient()`/`provideMfHttpClient()`. Remove it; hosted mode uses the host's HttpClient. |
-| `RouterModule.forRoot` duplicate guard | Exposed NgModule uses `forRoot`; change to `forChild` (standalone routes use plain `Routes`). |
-| `NODE_ENV must be one of [DEV, PROD]` | The terminal exports `NODE_ENV=production`; run with `NODE_ENV=DEV/PROD` explicitly. |
-| `SECRET_KEY` mismatch / no Authorization header | Fork `.env` `SECRET_KEY` differs from the host's; token reads return `undefined` silently. Copy the host's value locally. |
-| Remote hot-swap stopped; `outFileName` hashed; no `buildNotificationsEndpoint` | A production `bun run build` overwrote `dist/browser` while `ng serve` was running. Save a source file or restart `ng serve`; don't prod-build while dev-serving. |
-| `Cannot find module '@angular/...'` / weird runtime after merge | `package.json` and `bun.lock`/`node_modules` drifted. `bun install`; verify the installed version. |
-| Build OOM/stack error in a large fork | Keep the fork's documented `--stack-size`/memory flags in `start`/`build`; don't remove them to "match" the template blindly. |
-| Route loads but blank page | Check the route shape (a child may require `:id`), the host router config, and the console for errors; not every blank page is a version issue. |
+| Symptom                                                                        | Cause / fix                                                                                                                                                                                                              |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `NG0203 ... router duplicate forRoot guard`                                    | Host/fork Angular versions differ (strict singleton). Align exact versions, `bun install`, restart `ng serve`, hard-reload the host.                                                                                     |
+| `NG0912` duplicate component IDs                                               | Host and fork bundle the same library (`@ng-bootstrap`, `@angular/cdk`, `ngx-otp-input`). Usually warnings; not the blank-page cause.                                                                                    |
+| Route 404s although the manifest row exists                                    | `exposedModule` ≠ exported symbol, expose missing from `tsconfig.federation.json`, wrong `typeRemote`, wrong `path`, or the remote dev server is down/CORS. Check `remoteEntry.json` exposes and the host router config. |
+| `HttpClient` not provided / interceptor bypassed in the host                   | The exposed route/module provides `provideHttpClient()`/`provideMfHttpClient()`. Remove it; hosted mode uses the host's HttpClient.                                                                                      |
+| `RouterModule.forRoot` duplicate guard                                         | Exposed NgModule uses `forRoot`; change to `forChild` (standalone routes use plain `Routes`).                                                                                                                            |
+| `NODE_ENV must be one of [DEV, PROD]`                                          | The terminal exports `NODE_ENV=production`; run with `NODE_ENV=DEV/PROD` explicitly.                                                                                                                                     |
+| `SECRET_KEY` mismatch / no Authorization header                                | Fork `.env` `SECRET_KEY` differs from the host's; token reads return `undefined` silently. Copy the host's value locally.                                                                                                |
+| Remote hot-swap stopped; `outFileName` hashed; no `buildNotificationsEndpoint` | A production `bun run build` overwrote `dist/browser` while `ng serve` was running. Save a source file or restart `ng serve`; don't prod-build while dev-serving.                                                        |
+| `Cannot find module '@angular/...'` / weird runtime after merge                | `package.json` and `bun.lock`/`node_modules` drifted. `bun install`; verify the installed version.                                                                                                                       |
+| Build OOM/stack error in a large fork                                          | Keep the fork's documented `--stack-size`/memory flags in `start`/`build`; don't remove them to "match" the template blindly.                                                                                            |
+| Route loads but blank page                                                     | Check the route shape (a child may require `:id`), the host router config, and the console for errors; not every blank page is a version issue.                                                                          |
 
 ## Untouchables and report
 

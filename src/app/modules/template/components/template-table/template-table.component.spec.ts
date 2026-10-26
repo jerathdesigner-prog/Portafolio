@@ -1,4 +1,5 @@
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
+
 import type { TemplateInterface } from '../../interfaces/template.interface';
 import { TemplateTableComponent } from './template-table.component';
 
