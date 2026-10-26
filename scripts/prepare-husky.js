@@ -1,5 +1,5 @@
 // Git hooks bootstrap. Chained from `prepare.js` (skipped in CI).
-//
+// //
 // Points `core.hooksPath` at husky; the hooks themselves (`.husky/pre-commit`)
 // are tracked in the repo. Best-effort: a missing git or a failing husky never
 // breaks `bun install`.
