@@ -71,7 +71,7 @@ bun install                  # also creates .env from .env.example (never overwr
 bun run start                # load-env + dev server (warm-up, see host-integration.md) on :4250
 bun run build                # load-env + federation build -> dist/browser/remoteEntry.json
 bun run test                 # vitest (Angular unit tests) + node:test (scripts)
-bun run lint                 # oxlint (warnings fail too)
+bun run lint                 # oxlint (warnings fail locally; advisory in CI)
 bun run format               # oxfmt (write); format:check verifies
 bun run check                # oxlint + oxfmt --check (verify only, same as CI)
 bun run generate:module -- --name=<kebab-name> [--expose]
@@ -82,7 +82,9 @@ node scaffold/generate.js --service=mf-template --target=. --force   # regenerat
 
 - No npm/yarn/pnpm, no `package-lock.json`: the lockfile is `bun.lock`.
 - No ESLint/Prettier/Biome configuration: Oxc is the linter (`oxlint.config.mts`) and formatter
-  (`oxfmt.config.mts`); a husky pre-commit runs both on staged files (lint-staged).
+  (`oxfmt.config.mts`); a husky pre-commit formats staged files with oxfmt and reports oxlint
+  findings without blocking. CI `lint`/`format:check` are advisory (`allow_failure: true`): forks
+  carry legacy findings, so they warn instead of blocking `build_app`.
 - Do not edit `.gitlab-ci.yml` by hand: it is generated from `scaffold/templates/gitlab-ci.yml`
   (`node scaffold/generate.js --service=mf-template --target=. --force`, see `scaffold/README.md`).
 - Do not hardcode Node/Bun versions: `.node-version` and `.bun-version` are the source of truth

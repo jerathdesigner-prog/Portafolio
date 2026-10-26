@@ -56,7 +56,7 @@
   "lint-staged": {
     "*.{ts,mts,cts,js,mjs,cjs}": [
       "oxfmt --no-error-on-unmatched-pattern",
-      "oxlint --deny-warnings"
+      "sh -c 'oxlint \"$@\" || true' --"
     ],
     "*.{html,scss,css,json,jsonc,yml,yaml}": "oxfmt --no-error-on-unmatched-pattern"
   },

@@ -107,3 +107,15 @@ test('derive rejects invalid or duplicated extra env keys', () => {
     /duplicated extra env key "A_KEY"/,
   );
 });
+
+test('lint and format:check are advisory and never block build_app', () => {
+  const file = readConfig().files.find((entry) => entry.id === 'gitlab-ci');
+  const output = render(file, 'mf-template', '.');
+
+  for (const job of ['lint', 'format:check']) {
+    const block = output.split(`\n${job}:\n`)[1]?.split(/\n\S/)[0] ?? '';
+    assert.match(block, /^ {2}allow_failure: true$/m, `${job} must allow failure`);
+  }
+  const testUnit = output.split('\ntest:unit:\n')[1]?.split(/\n\S/)[0] ?? '';
+  assert.doesNotMatch(testUnit, /allow_failure: true/, 'test:unit must stay blocking');
+});

@@ -135,13 +135,19 @@ install_deps:
   needs:
     - job: resolve_versions
 
+# lint / format:check are ADVISORY: a failure shows as a warning (orange) and
+# never blocks build_app. Forks predate Oxc and carry hundreds of legacy lint and
+# format findings; fixing them is incremental work, not a release gate. New code
+# is still formatted by the pre-commit hook (lint-staged runs oxfmt).
 lint:
   extends: .test_base
+  allow_failure: true
   script:
     - npm run lint
 
 format:check:
   extends: .test_base
+  allow_failure: true
   script:
     - npm run format:check
 

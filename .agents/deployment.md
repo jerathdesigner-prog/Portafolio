@@ -31,7 +31,9 @@ detection + gates) → build → docker → deploy`, on `main`, `development`, `
   `BUN_VERSION` and `NODE_MAJOR` (dotenv artifact). Bun jobs use `oven/bun:${BUN_VERSION}-slim`;
   test jobs run on `node:${NODE_MAJOR}-slim` with `npm run` (Bun only installs);
   `build_image` passes `--build-arg BUN_VERSION`. Never hardcode a version in the pipeline.
-- `lint`, `format:check` and `test:unit` start in parallel right after `resolve_versions`;
+- `lint`, `format:check` and `test:unit` start in parallel right after `resolve_versions`.
+  `lint` and `format:check` are advisory (`allow_failure: true`, shown as a warning): forks predate
+  Oxc and carry legacy findings, so only `test:unit` and the security gates block `build_app`;
   `install_deps` only warms the cache for later pipelines.
 
 - `.gitlab-ci.yml` is GENERATED from `scaffold/templates/gitlab-ci.yml`: never edit it by hand.
