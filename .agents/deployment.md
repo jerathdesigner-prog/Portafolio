@@ -34,8 +34,11 @@ detection + gates) → build → docker → deploy`, on `main`, `development`, `
 - `lint`, `format:check` and `test:unit` start in parallel right after `resolve_versions`;
   `install_deps` only warms the cache for later pipelines.
 
-- Per-repo values are in the top `variables:` block (`SERVICE_NAME`, `CONTAINER_NAME`,
-  `COMPOSE_IMAGE_VAR`, `COMPOSE_FILE_*`, `RUNNER_TAG`); a fork edits only that block.
+- `.gitlab-ci.yml` is GENERATED from `scaffold/templates/gitlab-ci.yml`: never edit it by hand.
+  Edit the template, then `node scaffold/generate.js --service=<mf-name> --target=<repo> --force`
+  (see [`scaffold/README.md`](../scaffold/README.md)). Per-repo values (`SERVICE_NAME`,
+  `CONTAINER_NAME`, `COMPOSE_IMAGE_VAR`, `COMPOSE_FILE_*`, `RUNNER_TAG`) derive from `--service`;
+  `scripts/gitlab-ci-scaffold.test.js` fails when the committed file drifts from the template.
 - Environment-scoped CI/CD variables: `API_URL`, `SECRET_KEY`, `ENTITY_ROOT`, `NODE_ENV`,
   `DEPLOY_HOST_DEV|QA|PREPROD`, `DEPLOY_SSH_PRIVATE_KEY`.
 - `.npmrc` for `@neocore/*` is generated with `CI_JOB_TOKEN`; the project must be in the job-token

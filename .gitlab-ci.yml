@@ -1,7 +1,14 @@
+# ─────────────────────────────────────────────────────────────
+# ⚠️  GENERATED FILE — do not edit by hand.
+# Source: front-template/scaffold/templates/gitlab-ci.yml
+# Regenerate: node scaffold/generate.js --service=mf-template --target=. --force
+# ─────────────────────────────────────────────────────────────
 # Pipeline for a Neocore micro-frontend (modeled on frontcore).
-# install -> test -> security -> build -> docker -> deploy (dev / quality / pre-prod)
+# resolve_versions -> install -> test -> security -> build -> docker -> deploy
 #
-# Per-repo values live in `variables:` below — a fork only edits that block.
+# Canonical template: every `{{TOKEN}}` is derived from `--service` by
+# `scaffold/generate.js` (see scaffold/README.md). Edit the pipeline HERE and
+# regenerate each repo's `.gitlab-ci.yml`; never edit a generated copy by hand.
 # Per-environment secrets are GitLab CI/CD variables scoped to the environment:
 #   API_URL, SECRET_KEY (identical to the host), ENTITY_ROOT, NODE_ENV,
 #   DEPLOY_HOST_DEV, DEPLOY_HOST_QA, DEPLOY_HOST_PREPROD, DEPLOY_SSH_PRIVATE_KEY.
@@ -31,7 +38,7 @@ default:
     - $RUNNER_TAG
 
 variables:
-  # ---- Per-repo values (edit in each fork) --------------------------------
+  # ---- Per-repo values (derived by scaffold/generate.js) ------------------
   RUNNER_TAG: 'nc_core'
   # Service key in the server compose (docker compose up <SERVICE_NAME>).
   SERVICE_NAME: 'mf-template'

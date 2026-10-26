@@ -25,8 +25,10 @@ scope: most red states are one of these categories.
 - A fork-specific variable must exist in `.env.example`, in `load-env.js` (`readBaseConfig` and the
   generated interface) and in `.gitlab-ci.yml`'s `build_app` `.env` heredoc. Missing one makes a
   fresh CI build differ from local.
-- Keep the fork's top `variables:` block in `.gitlab-ci.yml` (`SERVICE_NAME`, `CONTAINER_NAME`,
-  `COMPOSE_IMAGE_VAR`, `COMPOSE_FILE_*`, `RUNNER_TAG`). The rest of the CI file is template.
+- `.gitlab-ci.yml` is generated: resolve it by regenerating, never by hand —
+  `node scaffold/generate.js --service=<mf-name> --target=. --force` (overrides such as
+  `--service-name=` / `--container-name=` when the server compose deviates). Reuse the exact
+  command in the fork's current banner; `scripts/gitlab-ci-scaffold.test.js` re-renders from it.
 
 ### `Dockerfile`, `nginx.conf`, `compose.yml`, `.dockerignore`
 

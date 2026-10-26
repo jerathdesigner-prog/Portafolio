@@ -18,6 +18,7 @@
     "format": "oxfmt",
     "check": "oxlint --deny-warnings && oxfmt --check",
     "generate:module": "node scripts/generate-module.js",
+    "generate:ci": "node scaffold/generate.js",
     "format:check": "oxfmt --check"
   },
   "dependencies": {

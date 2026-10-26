@@ -75,6 +75,7 @@ bun run lint                 # oxlint (warnings fail too)
 bun run format               # oxfmt (write); format:check verifies
 bun run check                # oxlint + oxfmt --check (verify only, same as CI)
 bun run generate:module -- --name=<kebab-name> [--expose]
+node scaffold/generate.js --service=mf-template --target=. --force   # regenerate .gitlab-ci.yml
 ```
 
 ## What NOT to do
@@ -82,6 +83,8 @@ bun run generate:module -- --name=<kebab-name> [--expose]
 - No npm/yarn/pnpm, no `package-lock.json`: the lockfile is `bun.lock`.
 - No ESLint/Prettier/Biome configuration: Oxc is the linter (`oxlint.config.mts`) and formatter
   (`oxfmt.config.mts`); a husky pre-commit runs both on staged files (lint-staged).
+- Do not edit `.gitlab-ci.yml` by hand: it is generated from `scaffold/templates/gitlab-ci.yml`
+  (`node scaffold/generate.js --service=mf-template --target=. --force`, see `scaffold/README.md`).
 - Do not hardcode Node/Bun versions: `.node-version` and `.bun-version` are the source of truth
   (CI `resolve_versions`, Dockerfile `ARG BUN_VERSION`, `package.json`), pinned by
   `scripts/tool-versions.test.js`.
