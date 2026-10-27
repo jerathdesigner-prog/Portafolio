@@ -32,6 +32,10 @@ live in [`.agents/`](.agents/); open the relevant doc before touching that area.
 - ⚠️ [New feature modules come from the generator](.agents/architecture.md#creating-a-module), never
   from copy-paste: `bun run generate:module -- --name=<kebab-name> [--expose]`.
 - ⚠️ [Tests next to the file they cover, written first when behavior changes](.agents/testing.md).
+- ⚠️ Dates use **Temporal**, never `Date` (lint `no-restricted-globals`). Browsers without native
+  Temporal (Safari/iOS) get `temporal-polyfill/global`: from `angular.json` polyfills standalone,
+  and from an `import 'temporal-polyfill/global';` in every exposed entry when hosted (a host never
+  runs a remote's polyfills).
 - ⚠️ Never commit `.env`, `.npmrc`, `src/environments/*`, `dist/` — they are gitignored on purpose.
 - ⚠️ **front-template keeps evolving from its forks.** When working in a fork (above all while
   merging front-template into it), if a change is general — a fix, tooling, config, CI, shared
@@ -52,6 +56,7 @@ live in [`.agents/`](.agents/); open the relevant doc before touching that area.
 | Backend URL prefix (also: ms-core, gateway path)                                                                | `MsPrefixEnum`                                                                                   | `src/app/shared/enums/ms-prefix.enum.ts`                                                        | [`.agents/architecture.md`](.agents/architecture.md)                         |
 | Standard response types (also: pagination, envelope)                                                            | `ServiceResponseInterface`, `PaginationResponseInterface`                                        | `src/app/shared/interfaces/response.interface.ts`                                               | —                                                                            |
 | Validate a bearer token value                                                                                   | `isUsableBearerToken()`                                                                          | `src/app/shared/helpers/bearer-token.helper.ts`                                                 | —                                                                            |
+| Dates and times (also: Temporal, Date, timezone, now)                                                           | Global `Temporal` (native, or `temporal-polyfill/global`)                                        | `Temporal.Now.instant()`, `Temporal.PlainDate.from(...)`                                        | —                                                                            |
 | Build-time configuration (also: env, API_URL, environment.ts)                                                   | `load-env.js` → `src/environments/environment.ts`                                                | `bun run env`                                                                                   | [`.agents/environment.md`](.agents/environment.md)                           |
 | Create a feature module (also: scaffold, generator)                                                             | Generator cloning `src/app/modules/template`                                                     | `bun run generate:module -- --name=<name> [--expose]`                                           | [`src/app/modules/template/README.md`](src/app/modules/template/README.md)   |
 

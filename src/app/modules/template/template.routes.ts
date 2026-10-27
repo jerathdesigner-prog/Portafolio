@@ -1,3 +1,6 @@
+// A host never runs this remote's `polyfills`, so the exposed entry installs
+// Temporal itself (only where the browser lacks it, e.g. Safari/iOS).
+import 'temporal-polyfill/global';
 import type { Routes } from '@angular/router';
 
 /**

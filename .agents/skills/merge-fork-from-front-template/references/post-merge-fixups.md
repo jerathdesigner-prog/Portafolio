@@ -45,6 +45,12 @@ scope: most red states are one of these categories.
   header.
 - `build-test` must stay a plain `@angular/build:application`; `test` uses
   `@angular/build:unit-test` + `tsconfig.spec.json`.
+- Temporal: keep `temporal-polyfill/global` in the `esbuild` and `build-test` polyfills, add
+  `"ESNext.Temporal"` to the fork's `tsconfig.json` `lib` (a fork that lists `lib` explicitly loses
+  the types otherwise), keep `temporal-polyfill` in the federation `skip` list, and add
+  `import 'temporal-polyfill/global';` to each EXPOSED entry: a host never runs the remote's
+  `polyfills`. Fork code still on `Date` now fails `no-restricted-globals`; migrate it to Temporal
+  as a follow-up (lint is advisory in CI), never by disabling the rule.
 
 ### `federation.config.mjs` / `tsconfig.federation.json`
 

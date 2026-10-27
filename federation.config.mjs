@@ -62,5 +62,10 @@ export default withNativeFederation({
     // host and frontcore; they are bundled locally instead of shared.
     'encrypt-storage',
     'pubsub-js',
+    // Polyfills are never shared: each remote bundles its own copy and
+    // `install()` is a no-op once Temporal exists, so remotes pinned to
+    // different polyfill versions cannot trip a strict-version check.
+    'temporal-polyfill',
+    'temporal-polyfill/global',
   ],
 });

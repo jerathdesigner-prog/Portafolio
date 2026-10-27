@@ -28,6 +28,18 @@ const config: OxlintConfig = {
   ],
   plugins: ['typescript', 'unicorn', 'oxc', 'import', 'vitest'],
   rules: {
+    // Side-effect imports hide what a module needs; the Temporal polyfill is
+    // the one exception (exposed entries install it, see template.routes.ts).
+    'import/no-unassigned-import': [
+      'warn',
+      { allow: ['temporal-polyfill/global'] },
+    ],
+    // Dates use Temporal (polyfilled by `temporal-polyfill/global`), never the
+    // legacy Date: mutable, month-zero-based and timezone-ambiguous.
+    'no-restricted-globals': [
+      'error',
+      { message: 'Use Temporal instead of Date.', name: 'Date' },
+    ],
     // Biome useSortedInterfaceMembers: interface members in natural order (autofix).
     'perfectionist/sort-interfaces': ['error', { type: 'natural' }],
     // Biome useSortedKeys: object literal keys in natural order (autofix).

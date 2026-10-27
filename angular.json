@@ -53,7 +53,11 @@
             "outputPath": "dist",
             "index": "src/index.html",
             "browser": "src/main.ts",
-            "polyfills": ["zone.js", "es-module-shims"],
+            "polyfills": [
+              "zone.js",
+              "es-module-shims",
+              "temporal-polyfill/global"
+            ],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "allowedCommonJsDependencies": ["encrypt-storage", "pubsub-js"],
@@ -115,6 +119,7 @@
             "outputPath": "dist-test",
             "index": false,
             "browser": "src/main.ts",
+            "polyfills": ["temporal-polyfill/global"],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "allowedCommonJsDependencies": ["encrypt-storage", "pubsub-js"],
