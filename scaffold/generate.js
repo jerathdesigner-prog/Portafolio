@@ -46,7 +46,9 @@ function parseArgs(argv) {
     if (eqIndex === -1) {
       parsed[withoutPrefix] = true;
     } else {
-      parsed[withoutPrefix.slice(0, eqIndex)] = withoutPrefix.slice(eqIndex + 1);
+      parsed[withoutPrefix.slice(0, eqIndex)] = withoutPrefix.slice(
+        eqIndex + 1,
+      );
     }
   }
   return parsed;
@@ -88,9 +90,12 @@ function extraEnvLines(csv = '') {
     .map((key) => key.trim())
     .filter(Boolean);
   keys.forEach((key, index) => {
-    if (!ENV_KEY_PATTERN.test(key)) throw new Error(`invalid extra env key "${key}"`);
-    if (BASE_ENV_KEYS.includes(key)) throw new Error(`"${key}" is already written by the template`);
-    if (keys.indexOf(key) !== index) throw new Error(`duplicated extra env key "${key}"`);
+    if (!ENV_KEY_PATTERN.test(key))
+      throw new Error(`invalid extra env key "${key}"`);
+    if (BASE_ENV_KEYS.includes(key))
+      throw new Error(`"${key}" is already written by the template`);
+    if (keys.indexOf(key) !== index)
+      throw new Error(`duplicated extra env key "${key}"`);
   });
   return keys.map((key) => `${key}=$${key}`);
 }
@@ -121,7 +126,9 @@ function substituteTokens(template, tokens) {
 // The regenerate command records the overrides too, so the banner alone is
 // enough to reproduce the file (the drift test parses it).
 function buildBanner(templatePath, service, targetLabel, overrides) {
-  const overrideArgs = Object.entries(overrides).map(([flag, value]) => ` --${flag}=${value}`);
+  const overrideArgs = Object.entries(overrides).map(
+    ([flag, value]) => ` --${flag}=${value}`,
+  );
   return [
     '# ─────────────────────────────────────────────────────────────',
     '# ⚠️  GENERATED FILE — do not edit by hand.',
@@ -136,7 +143,9 @@ function buildBanner(templatePath, service, targetLabel, overrides) {
 function render(file, service, targetLabel, overrides = {}) {
   const { shared } = readConfig();
   const tokens = derive(service, shared, overrides);
-  const template = toLf(fs.readFileSync(path.join(SCAFFOLD_DIR, file.template), 'utf8'));
+  const template = toLf(
+    fs.readFileSync(path.join(SCAFFOLD_DIR, file.template), 'utf8'),
+  );
   return `${buildBanner(file.template, service, targetLabel, overrides)}${substituteTokens(template, tokens)}`;
 }
 
@@ -187,20 +196,29 @@ function main() {
   }
 
   const onlyIds =
-    typeof args.only === 'string' ? args.only.split(',').map((id) => id.trim()) : null;
-  const files = readConfig().files.filter((file) => !onlyIds || onlyIds.includes(file.id));
-  if (files.length === 0) fail('no matching files to generate (check --only=<id[,id]>).');
+    typeof args.only === 'string'
+      ? args.only.split(',').map((id) => id.trim())
+      : null;
+  const files = readConfig().files.filter(
+    (file) => !onlyIds || onlyIds.includes(file.id),
+  );
+  if (files.length === 0)
+    fail('no matching files to generate (check --only=<id[,id]>).');
 
   for (const file of files) {
     const content = render(file, service, target, overrides);
     const outputPath = path.join(targetDir, file.output);
 
     if (args['dry-run']) {
-      console.log(`\n--- ${file.id} → ${file.output} (dry-run, not written) ---\n${content}`);
+      console.log(
+        `\n--- ${file.id} → ${file.output} (dry-run, not written) ---\n${content}`,
+      );
       continue;
     }
     if (fs.existsSync(outputPath) && !args.force) {
-      fail(`target file already exists: ${outputPath}\n       Use --force to overwrite.`);
+      fail(
+        `target file already exists: ${outputPath}\n       Use --force to overwrite.`,
+      );
     }
     fs.writeFileSync(outputPath, content, 'utf8');
     console.log(`[scaffold] ${file.id} → ${outputPath}`);

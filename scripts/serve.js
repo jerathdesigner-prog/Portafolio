@@ -38,11 +38,14 @@ function readDevServerPort(angularJson) {
 // so touching it warms both compilers.
 async function resolveWarmupFile(projectRoot = root) {
   try {
-    const configUrl = pathToFileURL(path.join(projectRoot, 'federation.config.mjs')).href;
+    const configUrl = pathToFileURL(
+      path.join(projectRoot, 'federation.config.mjs'),
+    ).href;
     const { default: config } = await import(configUrl);
     // withNativeFederation() normalizes each expose to `{ file }`.
     const [firstExposed] = Object.values(config.exposes ?? {});
-    const file = typeof firstExposed === 'string' ? firstExposed : firstExposed?.file;
+    const file =
+      typeof firstExposed === 'string' ? firstExposed : firstExposed?.file;
     if (file && fs.existsSync(path.join(projectRoot, file))) {
       return path.join(projectRoot, file);
     }
@@ -55,7 +58,7 @@ async function resolveWarmupFile(projectRoot = root) {
 function isServerUp(port) {
   return new Promise((resolve) => {
     const request = http.get(
-      { host: 'localhost', port, path: '/', timeout: POLL_INTERVAL_MS },
+      { host: 'localhost', path: '/', port, timeout: POLL_INTERVAL_MS },
       (res) => {
         res.resume();
         resolve(true);
@@ -88,11 +91,20 @@ async function warmUp(port, isAlive) {
   if (!(await waitForServer(port, isAlive))) return;
   const file = await resolveWarmupFile();
   touch(file);
-  console.info(`[serve] Warming up the incremental build (${path.relative(root, file)}).`);
+  console.info(
+    `[serve] Warming up the incremental build (${path.relative(root, file)}).`,
+  );
 }
 
 function main() {
-  const ngBin = path.join(root, 'node_modules', '@angular', 'cli', 'bin', 'ng.js');
+  const ngBin = path.join(
+    root,
+    'node_modules',
+    '@angular',
+    'cli',
+    'bin',
+    'ng.js',
+  );
   // process.execArgv keeps node flags such as --stack-size from package.json.
   const child = spawn(
     process.execPath,
@@ -112,7 +124,9 @@ function main() {
   }
 
   if (isWarmupEnabled()) {
-    const angularJson = JSON.parse(fs.readFileSync(path.join(root, 'angular.json'), 'utf8'));
+    const angularJson = JSON.parse(
+      fs.readFileSync(path.join(root, 'angular.json'), 'utf8'),
+    );
     warmUp(readDevServerPort(angularJson), () => alive).catch((error) => {
       console.warn(`[serve] Warm-up skipped: ${error.message}`);
     });

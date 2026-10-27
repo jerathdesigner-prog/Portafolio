@@ -35,7 +35,9 @@ describe('PubSubService', () => {
   it('exposes notification shortcuts for the host toasts and loader', () => {
     const received: Array<[string, unknown]> = [];
     for (const topic of ['loading', 'error', 'success']) {
-      PubSub.subscribe(topic, (name, data) => received.push([name as string, data]));
+      PubSub.subscribe(topic, (name, data) =>
+        received.push([name as string, data]),
+      );
     }
 
     service.loading(true, { sync: true });

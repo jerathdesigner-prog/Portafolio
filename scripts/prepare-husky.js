@@ -28,7 +28,10 @@ if (!run('git --version')) {
 run('git config rerere.enabled true');
 
 try {
-  execSync(path.join('node_modules', '.bin', 'husky'), { cwd: root, stdio: 'inherit' });
+  execSync(path.join('node_modules', '.bin', 'husky'), {
+    cwd: root,
+    stdio: 'inherit',
+  });
 } catch (error) {
   console.error('[prepare-husky] husky install failed:', error.message);
 }

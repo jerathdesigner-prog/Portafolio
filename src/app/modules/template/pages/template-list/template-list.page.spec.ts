@@ -7,8 +7,8 @@ import { TemplateListPage } from './template-list.page';
 
 describe('TemplateListPage', () => {
   const pubsub = {
-    loading: vi.fn<PubSubService['loading']>(),
     error: vi.fn<PubSubService['error']>(),
+    loading: vi.fn<PubSubService['loading']>(),
   };
 
   async function render(list: TemplateService['list']) {
@@ -31,9 +31,9 @@ describe('TemplateListPage', () => {
     const list = vi.fn<TemplateService['list']>(() =>
       of({
         data: {
+          page: 1,
           records: [{ id: 1, name: 'First', status: true }],
           total: 1,
-          page: 1,
           totalPage: 1,
         },
         message: 'ok',
@@ -42,7 +42,7 @@ describe('TemplateListPage', () => {
 
     const element = await render(list);
 
-    expect(list).toHaveBeenCalledWith({ page: 1, limit: 10 });
+    expect(list).toHaveBeenCalledWith({ limit: 10, page: 1 });
     expect(element.textContent).toContain('First');
     expect(pubsub.loading).toHaveBeenNthCalledWith(1, true);
     expect(pubsub.loading).toHaveBeenLastCalledWith(false);

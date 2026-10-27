@@ -25,53 +25,11 @@ function createEnvVar(varName) {
 
   return {
     /**
-     * Set default value if variable is not defined
-     * @param {string} defaultValue Default value
-     * @returns {object} Chainable validator
+     * Get the current value (for chaining without final conversion)
+     * @returns {*} Current value
      */
-    default(defaultValue) {
-      this.resolvedValue = value !== undefined ? value : defaultValue;
-      return this;
-    },
-
-    /**
-     * Mark variable as required (throw error if undefined)
-     * @returns {object} Chainable validator
-     */
-    required() {
-      if (value === undefined || value === '') {
-        throw new Error(`Required environment variable '${varName}' is not defined`);
-      }
-      this.resolvedValue = value;
-      return this;
-    },
-
-    /**
-     * Parse as string
-     * @returns {string} Parsed value
-     */
-    asString() {
-      const finalValue = this.resolvedValue !== undefined ? this.resolvedValue : value;
-      if (finalValue === undefined || finalValue === '') {
-        throw new Error(`Environment variable '${varName}' is not defined`);
-      }
-      return String(finalValue);
-    },
-
-    /**
-     * Parse as URL string with validation
-     * @returns {string} Validated URL
-     */
-    asUrlString() {
-      const finalValue = this.resolvedValue !== undefined ? this.resolvedValue : value;
-      if (finalValue === undefined || finalValue === '') {
-        throw new Error(`Environment variable '${varName}' is not defined`);
-      }
-      const urlString = String(finalValue);
-      if (!isValidUrl(urlString)) {
-        throw new Error(`Environment variable '${varName}' is not a valid URL: ${urlString}`);
-      }
-      return urlString;
+    _getValue() {
+      return this.resolvedValue !== undefined ? this.resolvedValue : value;
     },
 
     /**
@@ -80,7 +38,8 @@ function createEnvVar(varName) {
      * @returns {string} Validated enum value
      */
     asEnum(allowedValues) {
-      const finalValue = this.resolvedValue !== undefined ? this.resolvedValue : value;
+      const finalValue =
+        this.resolvedValue !== undefined ? this.resolvedValue : value;
       if (finalValue === undefined || finalValue === '') {
         throw new Error(`Environment variable '${varName}' is not defined`);
       }
@@ -96,11 +55,59 @@ function createEnvVar(varName) {
     },
 
     /**
-     * Get the current value (for chaining without final conversion)
-     * @returns {*} Current value
+     * Parse as string
+     * @returns {string} Parsed value
      */
-    _getValue() {
-      return this.resolvedValue !== undefined ? this.resolvedValue : value;
+    asString() {
+      const finalValue =
+        this.resolvedValue !== undefined ? this.resolvedValue : value;
+      if (finalValue === undefined || finalValue === '') {
+        throw new Error(`Environment variable '${varName}' is not defined`);
+      }
+      return String(finalValue);
+    },
+
+    /**
+     * Parse as URL string with validation
+     * @returns {string} Validated URL
+     */
+    asUrlString() {
+      const finalValue =
+        this.resolvedValue !== undefined ? this.resolvedValue : value;
+      if (finalValue === undefined || finalValue === '') {
+        throw new Error(`Environment variable '${varName}' is not defined`);
+      }
+      const urlString = String(finalValue);
+      if (!isValidUrl(urlString)) {
+        throw new Error(
+          `Environment variable '${varName}' is not a valid URL: ${urlString}`,
+        );
+      }
+      return urlString;
+    },
+
+    /**
+     * Set default value if variable is not defined
+     * @param {string} defaultValue Default value
+     * @returns {object} Chainable validator
+     */
+    default(defaultValue) {
+      this.resolvedValue = value !== undefined ? value : defaultValue;
+      return this;
+    },
+
+    /**
+     * Mark variable as required (throw error if undefined)
+     * @returns {object} Chainable validator
+     */
+    required() {
+      if (value === undefined || value === '') {
+        throw new Error(
+          `Required environment variable '${varName}' is not defined`,
+        );
+      }
+      this.resolvedValue = value;
+      return this;
     },
   };
 }

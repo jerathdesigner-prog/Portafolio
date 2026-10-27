@@ -27,7 +27,9 @@ describe('StorageService', () => {
     const host = new EncryptStorageNoble(environment.secretKey);
     host.setItem(host.hash('ACCESS_TOKEN'), 'host-token');
 
-    expect(service.getLocalStorage(StorageEnum.ACCESS_TOKEN)).toBe('host-token');
+    expect(service.getLocalStorage(StorageEnum.ACCESS_TOKEN)).toBe(
+      'host-token',
+    );
   });
 
   it('returns undefined for a missing key', () => {
@@ -35,7 +37,9 @@ describe('StorageService', () => {
   });
 
   it('discards a value that cannot be decrypted', () => {
-    const name = new EncryptStorageNoble(environment.secretKey).hash('ACCESS_TOKEN');
+    const name = new EncryptStorageNoble(environment.secretKey).hash(
+      'ACCESS_TOKEN',
+    );
     localStorage.setItem(name, 'not-a-valid-ciphertext-but-long-enough-to-try');
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 

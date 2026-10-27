@@ -20,7 +20,12 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const KEBAB = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
-const PROTECTED = [/TemplateRef/g, /templateUrl/g, /ng-template/g, /\btemplate(?=\s*:\s*[`'"])/g];
+const PROTECTED = [
+  /TemplateRef/g,
+  /templateUrl/g,
+  /ng-template/g,
+  /\btemplate(?=\s*:\s*[`'"])/g,
+];
 
 function capitalize(word) {
   return word.charAt(0).toUpperCase() + word.slice(1);
@@ -28,17 +33,19 @@ function capitalize(word) {
 
 function toCases(name) {
   if (!name || !KEBAB.test(name)) {
-    throw new Error(`Invalid module name "${name}": use kebab-case, e.g. --name=user-profile`);
+    throw new Error(
+      `Invalid module name "${name}": use kebab-case, e.g. --name=user-profile`,
+    );
   }
   if (name === 'template') {
     throw new Error('"template" is reserved: it is the source module.');
   }
   const words = name.split('-');
   return {
-    kebab: name,
-    pascal: words.map(capitalize).join(''),
     camel: words.map((word, i) => (i === 0 ? word : capitalize(word))).join(''),
     constant: words.join('_').toUpperCase(),
+    kebab: name,
+    pascal: words.map(capitalize).join(''),
   };
 }
 
@@ -62,8 +69,11 @@ function transformContent(source, cases) {
     .replace(/Template/g, cases.pascal)
     .replace(/\btemplate\b/g, cases.kebab);
 
-  // oxlint-disable-next-line no-control-regex -- placeholder delimiter
-  return content.replace(/\u0000(\d+)\u0000/g, (_match, index) => kept[Number(index)]);
+  return content.replace(
+    // oxlint-disable-next-line no-control-regex -- placeholder delimiter
+    /\u0000(\d+)\u0000/g,
+    (_match, index) => kept[Number(index)],
+  );
 }
 
 function copyRecursive(source, target, cases) {
@@ -75,7 +85,10 @@ function copyRecursive(source, target, cases) {
     if (entry.isDirectory()) {
       copyRecursive(from, to, cases);
     } else {
-      fs.writeFileSync(to, transformContent(fs.readFileSync(from, 'utf8'), cases));
+      fs.writeFileSync(
+        to,
+        transformContent(fs.readFileSync(from, 'utf8'), cases),
+      );
     }
   }
 }
@@ -92,7 +105,7 @@ function generateModule(root, cases) {
   try {
     copyRecursive(source, target, cases);
   } catch (err) {
-    fs.rmSync(target, { recursive: true, force: true });
+    fs.rmSync(target, { force: true, recursive: true });
     throw err;
   }
   return target;
@@ -107,7 +120,9 @@ function addExpose(root, cases) {
   if (!federation.includes(entry)) {
     const match = /exposes:\s*\{\n([\s\S]*?)(\n(\s*)\},)/.exec(federation);
     if (!match) {
-      throw new Error('Could not find the `exposes: { ... },` block in federation.config.mjs');
+      throw new Error(
+        'Could not find the `exposes: { ... },` block in federation.config.mjs',
+      );
     }
     const indent = `${match[3]}  `;
     const insertAt = match.index + match[0].length - match[2].length;
@@ -160,4 +175,10 @@ if (require.main === module) {
   }
 }
 
-module.exports = { toCases, transformFileName, transformContent, generateModule, addExpose };
+module.exports = {
+  addExpose,
+  generateModule,
+  toCases,
+  transformContent,
+  transformFileName,
+};

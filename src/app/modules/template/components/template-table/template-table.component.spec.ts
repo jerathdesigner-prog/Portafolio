@@ -13,7 +13,9 @@ describe('TemplateTableComponent', () => {
   ];
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [TemplateTableComponent] }).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [TemplateTableComponent],
+    }).compileComponents();
     fixture = TestBed.createComponent(TemplateTableComponent);
     element = fixture.nativeElement as HTMLElement;
   });
@@ -41,7 +43,9 @@ describe('TemplateTableComponent', () => {
     const selected: TemplateInterface[] = [];
     fixture.componentInstance.selected.subscribe((item) => selected.push(item));
 
-    element.querySelector<HTMLButtonElement>('tbody tr:nth-child(2) button')?.click();
+    element
+      .querySelector<HTMLButtonElement>('tbody tr:nth-child(2) button')
+      ?.click();
 
     expect(selected).toEqual([items[1]]);
   });

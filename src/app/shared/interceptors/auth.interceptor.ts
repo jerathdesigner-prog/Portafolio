@@ -20,7 +20,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     .join(', ');
 
   const token = storage.getLocalStorage(StorageEnum.ACCESS_TOKEN);
-  const addBearer = isUsableBearerToken(token) && !req.headers.has('Authorization');
+  const addBearer =
+    isUsableBearerToken(token) && !req.headers.has('Authorization');
 
   return next(
     req.clone({

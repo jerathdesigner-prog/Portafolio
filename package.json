@@ -45,6 +45,7 @@
     "@types/node": "^22.13.4",
     "@types/pubsub-js": "^1.8.6",
     "dotenv": "^17.4.2",
+    "eslint-plugin-perfectionist": "^5.12.1",
     "husky": "^9.1.7",
     "jsdom": "30.0.1",
     "lint-staged": "^17.6.0",
@@ -55,8 +56,8 @@
   },
   "lint-staged": {
     "*.{ts,mts,cts,js,mjs,cjs}": [
-      "oxfmt --no-error-on-unmatched-pattern",
-      "sh -c 'oxlint \"$@\" || true' --"
+      "sh -c 'oxlint --fix \"$@\" || true' --",
+      "oxfmt --no-error-on-unmatched-pattern"
     ],
     "*.{html,scss,css,json,jsonc,yml,yaml}": "oxfmt --no-error-on-unmatched-pattern"
   },

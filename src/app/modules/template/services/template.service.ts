@@ -10,7 +10,10 @@ import type {
   ServiceResponseInterface,
 } from '../../../shared/interfaces/response.interface';
 import { TemplateAction } from '../enums/template-action.enum';
-import type { TemplateInterface, TemplateParamsInterface } from '../interfaces/template.interface';
+import type {
+  TemplateInterface,
+  TemplateParamsInterface,
+} from '../interfaces/template.interface';
 
 @Injectable({ providedIn: 'root' })
 export class TemplateService {
@@ -19,16 +22,23 @@ export class TemplateService {
 
   list(
     params: TemplateParamsInterface,
-  ): Observable<ServiceResponseInterface<PaginationResponseInterface<TemplateInterface[]>>> {
-    let query = new HttpParams().set('page', params.page).set('limit', params.limit);
+  ): Observable<
+    ServiceResponseInterface<PaginationResponseInterface<TemplateInterface[]>>
+  > {
+    let query = new HttpParams()
+      .set('page', params.page)
+      .set('limit', params.limit);
     if (params.search) {
       query = query.set('search', params.search);
     }
     return this.http.get<
       ServiceResponseInterface<PaginationResponseInterface<TemplateInterface[]>>
     >(this.baseUrl, {
+      headers: buildPermissionHeaders(
+        TemplateAction.RESOURCE,
+        TemplateAction.LIST,
+      ),
       params: query,
-      headers: buildPermissionHeaders(TemplateAction.RESOURCE, TemplateAction.LIST),
     });
   }
 }

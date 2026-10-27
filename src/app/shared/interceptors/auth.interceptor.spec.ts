@@ -1,5 +1,12 @@
-import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  HttpClient,
+  provideHttpClient,
+  withInterceptors,
+} from '@angular/common/http';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
 import { StorageEnum } from '../enums/storage.enum';
@@ -51,7 +58,9 @@ describe('authInterceptor', () => {
   it('keeps an explicit Authorization header set by the caller', () => {
     storage.saveLocalStorage(StorageEnum.ACCESS_TOKEN, 'abc');
 
-    http.get('/api/resource', { headers: { Authorization: 'Bearer custom' } }).subscribe();
+    http
+      .get('/api/resource', { headers: { Authorization: 'Bearer custom' } })
+      .subscribe();
     const req = controller.expectOne('/api/resource');
 
     expect(req.request.headers.get('Authorization')).toBe('Bearer custom');

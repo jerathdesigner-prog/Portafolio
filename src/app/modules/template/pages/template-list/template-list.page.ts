@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject, type OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  type OnInit,
+  signal,
+} from '@angular/core';
 import { finalize } from 'rxjs';
 
 import { PubSubService } from '../../../../shared/services/pubsub.service';
@@ -15,10 +21,10 @@ type ViewState = 'loading' | 'error' | 'ready';
  * presentational components.
  */
 @Component({
-  selector: 'app-template-list-page',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TemplateTableComponent],
+  selector: 'app-template-list-page',
+  standalone: true,
   templateUrl: './template-list.page.html',
 })
 export class TemplateListPage implements OnInit {
@@ -39,17 +45,17 @@ export class TemplateListPage implements OnInit {
     this.state.set('loading');
     this.pubsub.loading(true);
     this.service
-      .list({ page: this.page(), limit: TEMPLATE_PAGE_SIZE })
+      .list({ limit: TEMPLATE_PAGE_SIZE, page: this.page() })
       .pipe(finalize(() => this.pubsub.loading(false)))
       .subscribe({
+        error: () => {
+          this.state.set('error');
+          this.pubsub.error('The records could not be loaded.');
+        },
         next: (res) => {
           this.items.set(res.data.records);
           this.total.set(res.data.total);
           this.state.set('ready');
-        },
-        error: () => {
-          this.state.set('error');
-          this.pubsub.error('The records could not be loaded.');
         },
       });
   }

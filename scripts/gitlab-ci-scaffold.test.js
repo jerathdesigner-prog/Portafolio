@@ -5,7 +5,12 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { test } = require('node:test');
 
-const { derive, parseArgs, readConfig, render } = require('../scaffold/generate.js');
+const {
+  derive,
+  parseArgs,
+  readConfig,
+  render,
+} = require('../scaffold/generate.js');
 
 const root = path.join(__dirname, '..');
 
@@ -13,11 +18,23 @@ const root = path.join(__dirname, '..');
 // was generated with, so a fork runs this same test without editing it.
 test('.gitlab-ci.yml matches the scaffold output recorded in its banner', () => {
   const file = readConfig().files.find((entry) => entry.id === 'gitlab-ci');
-  const committed = fs.readFileSync(path.join(root, file.output), 'utf8').replace(/\r\n/g, '\n');
-  const command = committed.match(/^# Regenerate: (node scaffold\/generate\.js .+)$/m);
-  assert.ok(command, `${file.output} has no generated banner: run node scaffold/generate.js`);
+  const committed = fs
+    .readFileSync(path.join(root, file.output), 'utf8')
+    .replace(/\r\n/g, '\n');
+  const command = committed.match(
+    /^# Regenerate: (node scaffold\/generate\.js .+)$/m,
+  );
+  assert.ok(
+    command,
+    `${file.output} has no generated banner: run node scaffold/generate.js`,
+  );
 
-  const { service, target, force: _force, ...overrides } = parseArgs(command[1].split(' '));
+  const {
+    service,
+    target,
+    force: _force,
+    ...overrides
+  } = parseArgs(command[1].split(' '));
   assert.equal(
     committed,
     render(file, service, target, overrides),
@@ -38,7 +55,9 @@ test('derive builds every token from the service name', () => {
 
 test('render records overrides in the regenerate command', () => {
   const file = readConfig().files.find((entry) => entry.id === 'gitlab-ci');
-  const output = render(file, 'mf-container', '.', { 'service-name': 'container' });
+  const output = render(file, 'mf-container', '.', {
+    'service-name': 'container',
+  });
 
   assert.match(
     output,
@@ -49,8 +68,8 @@ test('render records overrides in the regenerate command', () => {
 
 test('derive applies explicit overrides for repos that deviate', () => {
   const tokens = derive('mf-container', readConfig().shared, {
-    'service-name': 'container',
     'compose-base-dev': '/srv/docker',
+    'service-name': 'container',
   });
 
   assert.equal(tokens.SERVICE_NAME, 'container');
@@ -59,7 +78,10 @@ test('derive applies explicit overrides for repos that deviate', () => {
 });
 
 test('derive rejects a service without the mf- prefix', () => {
-  assert.throws(() => derive('template', readConfig().shared), /must start with "mf-"/);
+  assert.throws(
+    () => derive('template', readConfig().shared),
+    /must start with "mf-"/,
+  );
 });
 
 test('every template token is resolved', () => {
@@ -74,7 +96,9 @@ test('every template token is resolved', () => {
 
 test('extra env keys become lines of the build_app .env heredoc', () => {
   const file = readConfig().files.find((entry) => entry.id === 'gitlab-ci');
-  const output = render(file, 'mf-zoho', '.', { 'extra-env-keys': 'ZOHO_URL,ZOHO_ORG_ID' });
+  const output = render(file, 'mf-zoho', '.', {
+    'extra-env-keys': 'ZOHO_URL,ZOHO_ORG_ID',
+  });
 
   assert.match(
     output,
@@ -114,15 +138,25 @@ test('lint and format:check are advisory and never block build_app', () => {
 
   for (const job of ['lint', 'format:check']) {
     const block = output.split(`\n${job}:\n`)[1]?.split(/\n\S/)[0] ?? '';
-    assert.match(block, /^ {2}allow_failure: true$/m, `${job} must allow failure`);
+    assert.match(
+      block,
+      /^ {2}allow_failure: true$/m,
+      `${job} must allow failure`,
+    );
   }
   const testUnit = output.split('\ntest:unit:\n')[1]?.split(/\n\S/)[0] ?? '';
-  assert.doesNotMatch(testUnit, /allow_failure: true/, 'test:unit must stay blocking');
+  assert.doesNotMatch(
+    testUnit,
+    /allow_failure: true/,
+    'test:unit must stay blocking',
+  );
 });
 
 test('test:unit installs Chromium only when the repo uses Playwright', () => {
   const file = readConfig().files.find((entry) => entry.id === 'gitlab-ci');
-  const testUnit = render(file, 'mf-template', '.').split('\ntest:unit:\n')[1]?.split(/\n\S/)[0];
+  const testUnit = render(file, 'mf-template', '.')
+    .split('\ntest:unit:\n')[1]
+    ?.split(/\n\S/)[0];
   assert.ok(testUnit, 'test:unit job not found');
 
   const install = testUnit.indexOf(

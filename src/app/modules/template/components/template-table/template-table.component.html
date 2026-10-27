@@ -12,7 +12,9 @@
         <td>{{ item.name }}</td>
         <td>{{ item.status ? 'Active' : 'Inactive' }}</td>
         <td>
-          <button type="button" (click)="selected.emit(item)">View {{ item.name }}</button>
+          <button type="button" (click)="selected.emit(item)">
+            View {{ item.name }}
+          </button>
         </td>
       </tr>
     } @empty {

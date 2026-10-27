@@ -1,4 +1,7 @@
-import { shareAll, withNativeFederation } from '@angular-architects/native-federation/config';
+import {
+  shareAll,
+  withNativeFederation,
+} from '@angular-architects/native-federation/config';
 
 // Remote policy, aligned with the host (frontcontainer) and frontcore:
 // the whole Angular/rxjs stack is a strict singleton. The host shares the same
@@ -7,16 +10,13 @@ import { shareAll, withNativeFederation } from '@angular-architects/native-feder
 // `includeSecondaries: true` registers secondary entry points (for example
 // `@angular/common/http`); shareAll() only registers the root export otherwise.
 const strict = {
+  requiredVersion: 'auto',
   singleton: true,
   strictVersion: true,
-  requiredVersion: 'auto',
 };
 const strictSecondary = { ...strict, includeSecondaries: true };
 
 export default withNativeFederation({
-  // Must be unique across every remote registered in the host manifest.
-  name: 'mf-template',
-
   // Contract with the host: the key `./X` MUST equal the exported symbol `X`.
   // The host resolves `m[entry.exposedModule]` after loadRemoteModule() and,
   // with typeRemote 'module', mounts it through loadChildren.
@@ -24,6 +24,14 @@ export default withNativeFederation({
   exposes: {
     './TemplateRoutes': './src/app/modules/template/template.routes.ts',
   },
+
+  features: {
+    // Opt-in: groups chunks in remoteEntry.json for a smaller metadata file.
+    denseChunking: true,
+  },
+
+  // Must be unique across every remote registered in the host manifest.
+  name: 'mf-template',
 
   shared: {
     ...shareAll(strict, {
@@ -55,9 +63,4 @@ export default withNativeFederation({
     'encrypt-storage',
     'pubsub-js',
   ],
-
-  features: {
-    // Opt-in: groups chunks in remoteEntry.json for a smaller metadata file.
-    denseChunking: true,
-  },
 });

@@ -7,7 +7,7 @@ export interface TemplateInterface {
 
 /** Query parameters of the list endpoint. */
 export interface TemplateParamsInterface {
-  page: number;
   limit: number;
+  page: number;
   search?: string | null;
 }

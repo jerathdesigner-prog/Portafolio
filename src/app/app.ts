@@ -6,10 +6,10 @@ import { RouterOutlet } from '@angular/router';
  * exposed routes inside its own layout and never instantiates this component.
  */
 @Component({
-  selector: 'app-root',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterOutlet],
+  selector: 'app-root',
+  standalone: true,
   template: '<router-outlet />',
 })
 export class App {}

@@ -3,7 +3,11 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { test } = require('node:test');
 
-const { isWarmupEnabled, readDevServerPort, resolveWarmupFile } = require('./serve.js');
+const {
+  isWarmupEnabled,
+  readDevServerPort,
+  resolveWarmupFile,
+} = require('./serve.js');
 
 const root = path.join(__dirname, '..');
 
@@ -15,7 +19,9 @@ test('warm-up is on by default and off with NG_DEV_WARMUP=0/false', () => {
 });
 
 test('readDevServerPort reads the serve-original port, not the federation one', () => {
-  const angularJson = JSON.parse(fs.readFileSync(path.join(root, 'angular.json'), 'utf8'));
+  const angularJson = JSON.parse(
+    fs.readFileSync(path.join(root, 'angular.json'), 'utf8'),
+  );
   const port = readDevServerPort(angularJson);
 
   assert.equal(typeof port, 'number');

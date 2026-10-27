@@ -3,17 +3,11 @@ import type { OxlintConfig } from 'oxlint';
 // Linter of this repo (replaces Biome).
 // Docs: https://oxc.rs/docs/guide/usage/linter/config.html
 const config: OxlintConfig = {
-  plugins: ['typescript', 'unicorn', 'oxc', 'import', 'vitest'],
-  env: { browser: true, es2024: true },
   categories: {
     correctness: 'error',
     suspicious: 'warn',
   },
-  rules: {
-    // Angular components/services are classes whose members can all live in
-    // decorators (e.g. the root `App` component): not dead code.
-    'typescript/no-extraneous-class': 'off',
-  },
+  env: { browser: true, es2024: true },
   ignorePatterns: [
     'dist/**',
     'coverage/**',
@@ -22,12 +16,26 @@ const config: OxlintConfig = {
     'odd/**',
     'src/environments/**',
   ],
+  // Same sorting as backtemplate's Biome assist actions (useSortedKeys,
+  // useSortedInterfaceMembers). Oxc has no interface-member sorter, so it comes
+  // from eslint-plugin-perfectionist through oxlint's JS plugin support.
+  jsPlugins: ['eslint-plugin-perfectionist'],
   overrides: [
     {
-      files: ['scripts/**', '*.js', '*.mjs', '*.cjs'],
       env: { node: true },
+      files: ['scripts/**', '*.js', '*.mjs', '*.cjs'],
     },
   ],
+  plugins: ['typescript', 'unicorn', 'oxc', 'import', 'vitest'],
+  rules: {
+    // Biome useSortedInterfaceMembers: interface members in natural order (autofix).
+    'perfectionist/sort-interfaces': ['error', { type: 'natural' }],
+    // Biome useSortedKeys: object literal keys in natural order (autofix).
+    'sort-keys': ['error', 'asc', { natural: true }],
+    // Angular components/services are classes whose members can all live in
+    // decorators (e.g. the root `App` component): not dead code.
+    'typescript/no-extraneous-class': 'off',
+  },
 };
 
 // CommonJS export: package.json has no "type": "module" (the repo scripts are

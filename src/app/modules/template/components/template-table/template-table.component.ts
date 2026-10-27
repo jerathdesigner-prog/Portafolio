@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  output,
+} from '@angular/core';
 
 import type { TemplateInterface } from '../../interfaces/template.interface';
 
@@ -7,9 +12,9 @@ import type { TemplateInterface } from '../../interfaces/template.interface';
  * No services, no HTTP, no PubSub — the page (container) owns all of that.
  */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-template-table',
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './template-table.component.html',
 })
 export class TemplateTableComponent {

@@ -18,10 +18,10 @@ const cases = toCases('sample-feature');
 
 test('toCases derives every naming variant from a kebab-case name', () => {
   assert.deepEqual(cases, {
-    kebab: 'sample-feature',
-    pascal: 'SampleFeature',
     camel: 'sampleFeature',
     constant: 'SAMPLE_FEATURE',
+    kebab: 'sample-feature',
+    pascal: 'SampleFeature',
   });
 });
 
@@ -32,8 +32,14 @@ test('toCases rejects names that are not kebab-case', () => {
 });
 
 test('transformFileName renames template files', () => {
-  assert.equal(transformFileName('template.service.ts', cases), 'sample-feature.service.ts');
-  assert.equal(transformFileName('template-list.page.ts', cases), 'sample-feature-list.page.ts');
+  assert.equal(
+    transformFileName('template.service.ts', cases),
+    'sample-feature.service.ts',
+  );
+  assert.equal(
+    transformFileName('template-list.page.ts', cases),
+    'sample-feature-list.page.ts',
+  );
   assert.equal(transformFileName('pages', cases), 'pages');
 });
 
@@ -61,7 +67,10 @@ test('transformContent renames symbols, paths, selectors and constants', () => {
 });
 
 test('transformContent renames a permission string that looks like a key', () => {
-  assert.equal(transformContent("toBe('template:listar')", cases), "toBe('sample-feature:listar')");
+  assert.equal(
+    transformContent("toBe('template:listar')", cases),
+    "toBe('sample-feature:listar')",
+  );
 });
 
 test('transformContent keeps Angular template keywords intact', () => {
@@ -87,12 +96,15 @@ test('generateModule clones the template module and refuses to overwrite', () =>
 
   assert.equal(target, path.join(root, 'src/app/modules/sample-feature'));
   assert.equal(
-    fs.readFileSync(path.join(target, 'services/sample-feature.service.ts'), 'utf8'),
+    fs.readFileSync(
+      path.join(target, 'services/sample-feature.service.ts'),
+      'utf8',
+    ),
     'export class SampleFeatureService {}\n',
   );
   assert.equal(fs.existsSync(path.join(target, 'README.md')), false);
   assert.throws(() => generateModule(root, cases), /already exists/);
-  fs.rmSync(root, { recursive: true, force: true });
+  fs.rmSync(root, { force: true, recursive: true });
 });
 
 test('addExpose registers the routes in federation.config.mjs and tsconfig.federation.json', () => {
@@ -109,17 +121,22 @@ test('addExpose registers the routes in federation.config.mjs and tsconfig.feder
   addExpose(root, cases);
   addExpose(root, cases); // idempotent
 
-  const federation = fs.readFileSync(path.join(root, 'federation.config.mjs'), 'utf8');
+  const federation = fs.readFileSync(
+    path.join(root, 'federation.config.mjs'),
+    'utf8',
+  );
   assert.equal(
     federation.split(
       "'./SampleFeatureRoutes': './src/app/modules/sample-feature/sample-feature.routes.ts',",
     ).length,
     2,
   );
-  const tsconfig = JSON.parse(fs.readFileSync(path.join(root, 'tsconfig.federation.json'), 'utf8'));
+  const tsconfig = JSON.parse(
+    fs.readFileSync(path.join(root, 'tsconfig.federation.json'), 'utf8'),
+  );
   assert.deepEqual(tsconfig.files, [
     'src/app/modules/template/template.routes.ts',
     'src/app/modules/sample-feature/sample-feature.routes.ts',
   ]);
-  fs.rmSync(root, { recursive: true, force: true });
+  fs.rmSync(root, { force: true, recursive: true });
 });

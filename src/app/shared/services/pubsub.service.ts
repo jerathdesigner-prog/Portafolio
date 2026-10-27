@@ -42,7 +42,11 @@ export class PubSubService {
     this.emit(PubSubTopic.INFO, message, options);
   }
 
-  private emit(topic: PubSubTopic, data: unknown, options?: PublishOptions): void {
+  private emit(
+    topic: PubSubTopic,
+    data: unknown,
+    options?: PublishOptions,
+  ): void {
     if (options?.sync) {
       this.publishSync(topic, data);
     } else {

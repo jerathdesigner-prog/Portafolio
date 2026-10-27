@@ -5,8 +5,11 @@ import type { Routes } from '@angular/router';
 // here the module is served under the same kind of prefix.
 export const routes: Routes = [
   {
+    loadChildren: () =>
+      import('./modules/template/template.routes').then(
+        (m) => m.TemplateRoutes,
+      ),
     path: 'template',
-    loadChildren: () => import('./modules/template/template.routes').then((m) => m.TemplateRoutes),
   },
   { path: '', pathMatch: 'full', redirectTo: 'template' },
 ];

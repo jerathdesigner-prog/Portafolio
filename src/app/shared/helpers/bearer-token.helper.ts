@@ -7,5 +7,7 @@ export function isUsableBearerToken(token: unknown): token is string {
     return false;
   }
   const normalized = token.trim().toLowerCase();
-  return normalized.length > 0 && normalized !== 'undefined' && normalized !== 'null';
+  return (
+    normalized.length > 0 && normalized !== 'undefined' && normalized !== 'null'
+  );
 }

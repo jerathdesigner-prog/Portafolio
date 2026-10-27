@@ -11,15 +11,25 @@ const root = path.join(__dirname, '..');
 
 function sandbox(envContent) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'load-env-'));
-  fs.copyFileSync(path.join(root, 'load-env.js'), path.join(dir, 'load-env.js'));
+  fs.copyFileSync(
+    path.join(root, 'load-env.js'),
+    path.join(dir, 'load-env.js'),
+  );
   fs.mkdirSync(path.join(dir, 'scripts'));
   fs.copyFileSync(
     path.join(root, 'scripts/env-helper.js'),
     path.join(dir, 'scripts/env-helper.js'),
   );
-  fs.copyFileSync(path.join(root, '.env.example'), path.join(dir, '.env.example'));
-  fs.symlinkSync(path.join(root, 'node_modules'), path.join(dir, 'node_modules'));
-  if (envContent !== undefined) fs.writeFileSync(path.join(dir, '.env'), envContent);
+  fs.copyFileSync(
+    path.join(root, '.env.example'),
+    path.join(dir, '.env.example'),
+  );
+  fs.symlinkSync(
+    path.join(root, 'node_modules'),
+    path.join(dir, 'node_modules'),
+  );
+  if (envContent !== undefined)
+    fs.writeFileSync(path.join(dir, '.env'), envContent);
   return dir;
 }
 
@@ -28,8 +38,15 @@ function run(dir, args, extraEnv = {}) {
   for (const key of ['API_URL', 'SECRET_KEY', 'ENTITY_ROOT', 'NODE_ENV']) {
     if (!(key in extraEnv)) delete env[key];
   }
-  execFileSync(process.execPath, ['load-env.js', ...args], { cwd: dir, env, stdio: 'pipe' });
-  return fs.readFileSync(path.join(dir, 'src/environments/environment.ts'), 'utf8');
+  execFileSync(process.execPath, ['load-env.js', ...args], {
+    cwd: dir,
+    env,
+    stdio: 'pipe',
+  });
+  return fs.readFileSync(
+    path.join(dir, 'src/environments/environment.ts'),
+    'utf8',
+  );
 }
 
 const exampleApiUrl = () =>
@@ -45,7 +62,7 @@ test('--example ignores .env and reads .env.example', () => {
     assert.match(output, new RegExp(exampleApiUrl().replaceAll('.', '\\.')));
     assert.doesNotMatch(output, /from-dot-env/);
   } finally {
-    fs.rmSync(dir, { recursive: true, force: true });
+    fs.rmSync(dir, { force: true, recursive: true });
   }
 });
 
@@ -54,17 +71,19 @@ test('--example works when .env exists but is empty', () => {
   try {
     assert.match(run(dir, ['--example']), /apiUrl/);
   } finally {
-    fs.rmSync(dir, { recursive: true, force: true });
+    fs.rmSync(dir, { force: true, recursive: true });
   }
 });
 
 test('process variables still win over .env.example', () => {
   const dir = sandbox();
   try {
-    const output = run(dir, ['--example'], { API_URL: 'http://from-process.invalid' });
+    const output = run(dir, ['--example'], {
+      API_URL: 'http://from-process.invalid',
+    });
     assert.match(output, /from-process\.invalid/);
   } finally {
-    fs.rmSync(dir, { recursive: true, force: true });
+    fs.rmSync(dir, { force: true, recursive: true });
   }
 });
 
@@ -77,6 +96,6 @@ test('without --example, .env is used as before', () => {
   try {
     assert.match(run(dir, []), /from-dot-env\.invalid/);
   } finally {
-    fs.rmSync(dir, { recursive: true, force: true });
+    fs.rmSync(dir, { force: true, recursive: true });
   }
 });

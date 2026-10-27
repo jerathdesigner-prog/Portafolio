@@ -39,10 +39,10 @@ const SKIP_REMOTE = ['1', 'true', 'yes'].includes(
 );
 
 const log = {
-  ok: (msg) => console.info(`\x1b[32m✓\x1b[0m ${msg}`),
-  warn: (msg) => console.warn(`\x1b[33m⚠\x1b[0m ${msg}`),
   fail: (msg) => console.error(`\x1b[31m✗\x1b[0m ${msg}`),
   info: (msg) => console.info(`\x1b[36mℹ\x1b[0m ${msg}`),
+  ok: (msg) => console.info(`\x1b[32m✓\x1b[0m ${msg}`),
+  warn: (msg) => console.warn(`\x1b[33m⚠\x1b[0m ${msg}`),
 };
 
 const mask = (value) => {
@@ -67,29 +67,38 @@ function loadDotenv() {
     return;
   }
   if (fs.existsSync(ENV_EXAMPLE_FILE)) {
-    log.warn('.env not found — using .env.example defaults (run `bun install` to create .env).');
+    log.warn(
+      '.env not found — using .env.example defaults (run `bun install` to create .env).',
+    );
     // No override: real environment variables (CI) still win over the example.
     dotenv.config({ path: ENV_EXAMPLE_FILE, quiet: true });
     return;
   }
-  log.warn('Neither .env nor .env.example found — relying on process environment only.');
+  log.warn(
+    'Neither .env nor .env.example found — relying on process environment only.',
+  );
 }
 
 function readBaseConfig() {
   const missing = REQUIRED_VARS.filter((key) => !process.env[key]);
   if (missing.length > 0) {
-    throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+    throw new Error(
+      `Missing required environment variables: ${missing.join(', ')}`,
+    );
   }
   // encrypt-storage rejects secrets shorter than 10 characters at runtime;
   // fail here instead of shipping a bundle that crashes on first storage access.
   if (process.env.SECRET_KEY.length < 10) {
-    throw new Error('SECRET_KEY must have at least 10 characters (and match the host).');
+    throw new Error(
+      'SECRET_KEY must have at least 10 characters (and match the host).',
+    );
   }
   return {
-    production: env.get('NODE_ENV').default('DEV').asEnum(['DEV', 'PROD']) === 'PROD',
     apiUrl: env.get('API_URL').required().asUrlString(),
-    secretKey: env.get('SECRET_KEY').required().asString(),
     entityRoot: env.get('ENTITY_ROOT').required().asString(),
+    production:
+      env.get('NODE_ENV').default('DEV').asEnum(['DEV', 'PROD']) === 'PROD',
+    secretKey: env.get('SECRET_KEY').required().asString(),
   };
 }
 
@@ -105,7 +114,9 @@ async function fetchRemoteConfig(apiUrl) {
   }
   const url = `${apiUrl.replace(/\/+$/, '')}/ms-core/parameter/env`;
   try {
-    const response = await fetch(url, { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const body = await response.json();
     const data = body?.data;
@@ -113,7 +124,9 @@ async function fetchRemoteConfig(apiUrl) {
     log.ok(`Remote environment config loaded from ${url}`);
     return data;
   } catch (err) {
-    log.warn(`Could not fetch ${url} (${err.message}) — continuing with .env values only.`);
+    log.warn(
+      `Could not fetch ${url} (${err.message}) — continuing with .env values only.`,
+    );
     return {};
   }
 }
@@ -130,7 +143,9 @@ function tsTypeOf(value) {
 const IDENTIFIER = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 
 function writeFiles(baseConfig, remoteConfig) {
-  const baseKeys = new Set(Object.keys(baseConfig).map((key) => key.toLowerCase()));
+  const baseKeys = new Set(
+    Object.keys(baseConfig).map((key) => key.toLowerCase()),
+  );
   const extra = Object.entries(remoteConfig).filter(
     ([key]) => IDENTIFIER.test(key) && !baseKeys.has(key.toLowerCase()),
   );
@@ -175,7 +190,9 @@ async function main() {
   const baseConfig = readBaseConfig();
   for (const key of REQUIRED_VARS) {
     const value = process.env[key];
-    log.info(`${key.padEnd(12)} = ${SENSITIVE_KEYS.has(key) ? mask(value) : value}`);
+    log.info(
+      `${key.padEnd(12)} = ${SENSITIVE_KEYS.has(key) ? mask(value) : value}`,
+    );
   }
   const remoteConfig = await fetchRemoteConfig(baseConfig.apiUrl);
   writeFiles(baseConfig, remoteConfig);

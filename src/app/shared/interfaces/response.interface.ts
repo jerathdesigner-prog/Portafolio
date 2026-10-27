@@ -6,8 +6,8 @@ export interface ServiceResponseInterface<T> {
 
 /** Standard paginated payload returned inside `data`. */
 export interface PaginationResponseInterface<T> {
+  page: number;
   records: T;
   total: number;
-  page: number;
   totalPage: number;
 }

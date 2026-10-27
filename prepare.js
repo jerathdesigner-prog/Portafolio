@@ -14,7 +14,9 @@ function isEnabled(name) {
 }
 
 if (isEnabled('CI') || isEnabled('SKIP_PREPARE')) {
-  console.info('[prepare] CI detected — skipping local environment bootstrap (husky/env).');
+  console.info(
+    '[prepare] CI detected — skipping local environment bootstrap (husky/env).',
+  );
   process.exit(0);
 }
 

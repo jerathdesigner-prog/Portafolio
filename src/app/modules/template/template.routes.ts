@@ -10,14 +10,16 @@ import type { Routes } from '@angular/router';
  */
 export const TemplateRoutes: Routes = [
   {
-    path: '',
     children: [
       {
+        loadComponent: () =>
+          import('./pages/template-list/template-list.page').then(
+            (m) => m.TemplateListPage,
+          ),
         path: '',
         title: 'Template',
-        loadComponent: () =>
-          import('./pages/template-list/template-list.page').then((m) => m.TemplateListPage),
       },
     ],
+    path: '',
   },
 ];

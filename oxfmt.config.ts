@@ -3,18 +3,10 @@ import type { OxfmtConfig } from 'oxfmt';
 // Formatter of this repo (replaces Biome). Prettier-compatible output.
 // Docs: https://oxc.rs/docs/guide/usage/formatter/config.html
 const config: OxfmtConfig = {
-  printWidth: 100,
-  tabWidth: 2,
-  useTabs: false,
-  singleQuote: true,
-  semi: true,
-  trailingComma: 'all',
   arrowParens: 'always',
-  bracketSpacing: true,
-  // Same behavior Biome had with `organizeImports`.
-  sortImports: true,
   // Angular templates: format `.html` with the Angular template parser.
   associations: [{ files: ['src/**/*.html'], language: 'angular-html' }],
+  bracketSpacing: true,
   ignorePatterns: [
     'dist/**',
     'coverage/**',
@@ -28,6 +20,14 @@ const config: OxfmtConfig = {
     // Hand-written docs: padding Markdown tables only adds noise.
     '**/*.md',
   ],
+  printWidth: 80,
+  semi: true,
+  singleQuote: true,
+  // Same behavior Biome had with `organizeImports`.
+  sortImports: true,
+  tabWidth: 2,
+  trailingComma: 'all',
+  useTabs: false,
 };
 
 // CommonJS export: package.json has no "type": "module" (the repo scripts are
