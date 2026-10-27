@@ -40,8 +40,9 @@ test('lint rejects the legacy Date global', () => {
 });
 
 test('standalone builds and tests load the Temporal polyfill', () => {
-  const architect = JSON.parse(read('angular.json')).projects['mf-template']
-    .architect;
+  // Forks rename the project: read the only one instead of `mf-template`.
+  const [project] = Object.values(JSON.parse(read('angular.json')).projects);
+  const { architect } = project;
   for (const target of ['esbuild', 'build-test']) {
     assert.ok(
       architect[target].options.polyfills?.includes('temporal-polyfill/global'),
