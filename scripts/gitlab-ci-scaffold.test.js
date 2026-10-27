@@ -119,3 +119,18 @@ test('lint and format:check are advisory and never block build_app', () => {
   const testUnit = output.split('\ntest:unit:\n')[1]?.split(/\n\S/)[0] ?? '';
   assert.doesNotMatch(testUnit, /allow_failure: true/, 'test:unit must stay blocking');
 });
+
+test('test:unit installs Chromium only when the repo uses Playwright', () => {
+  const file = readConfig().files.find((entry) => entry.id === 'gitlab-ci');
+  const testUnit = render(file, 'mf-template', '.').split('\ntest:unit:\n')[1]?.split(/\n\S/)[0];
+  assert.ok(testUnit, 'test:unit job not found');
+
+  const install = testUnit.indexOf(
+    'if [ -d node_modules/playwright ]; then npx playwright install --with-deps --only-shell chromium; fi',
+  );
+  assert.notEqual(install, -1, 'missing the conditional Playwright install');
+  assert.ok(
+    install < testUnit.indexOf('npm run test'),
+    'Chromium must be installed before the tests run',
+  );
+});

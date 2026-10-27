@@ -157,6 +157,11 @@ test:unit:
     # Unit tests only need the base environment file, not the remote config.
     SKIP_ENV_FETCH: '1'
   script:
+    # Forks that run Angular tests in a real browser (vitest browser mode via
+    # @vitest/browser-playwright) need Chromium and its system libraries, which
+    # the node:*-slim image does not ship. No-op when Playwright is not installed
+    # (the template itself tests on jsdom).
+    - if [ -d node_modules/playwright ]; then npx playwright install --with-deps --only-shell chromium; fi
     # Angular unit tests (vitest) + node:test for scripts/ (incl. the
     # .node-version/.bun-version guard).
     - npm run test
