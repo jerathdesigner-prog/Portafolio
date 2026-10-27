@@ -101,7 +101,7 @@ bun install
 NODE_ENV=DEV SKIP_ENV_FETCH=1 bun run test     # @angular/build:unit-test + node --test scripts
 NODE_ENV=PROD SKIP_ENV_FETCH=1 bun run build   # federation build -> dist/browser/remoteEntry.json
 bun run lint                                   # oxlint
-bun run check                                  # oxlint + oxfmt --check (verify)
+bun run verify                                 # oxlint + oxfmt --check (verify)
 ```
 
 Then:

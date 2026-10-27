@@ -15,11 +15,11 @@
     "test:scripts": "node --test 'scripts/**/*.test.js'",
     "lint": "oxlint --deny-warnings",
     "lint:fix": "oxlint --fix",
-    "oxc:format": "oxfmt",
-    "oxc:check": "oxlint --deny-warnings && oxfmt --check",
+    "format": "oxfmt",
+    "verify": "oxlint --deny-warnings && oxfmt --check",
     "generate:module": "node scripts/generate-module.js",
     "generate:ci": "node scaffold/generate.js",
-    "oxc:format:check": "oxfmt --check"
+    "format:check": "oxfmt --check"
   },
   "dependencies": {
     "@angular-architects/native-federation": "22.2.2",
@@ -41,7 +41,9 @@
     "@angular/build": "22.2.1",
     "@angular/cli": "22.2.1",
     "@angular/compiler-cli": "22.2.1",
+    "@colbymchenry/codegraph": "1.6.2",
     "@softarc/native-federation-orchestrator": "^4.6.0",
+    "@types/bun": "^1.4.3",
     "@types/node": "^22.13.4",
     "@types/pubsub-js": "^1.8.6",
     "dotenv": "^17.4.2",

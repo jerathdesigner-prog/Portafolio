@@ -72,13 +72,14 @@ Fork-only capabilities: [`.agents/capabilities.local.md`](.agents/capabilities.l
 ## Commands
 
 ```bash
-bun install                  # also creates .env from .env.example (never overwrites)
+bun install                  # also creates .env from .env.example (never overwrites) and,
+                             # the first time, indexes the repo with CodeGraph (.codegraph/)
 bun run start                # load-env + ng serve on http://localhost:4250
 bun run build                # load-env + federation build -> dist/browser/remoteEntry.json
 bun run test                 # vitest (Angular unit tests) + node:test (scripts)
 bun run lint                 # oxlint (warnings fail locally; advisory in CI)
 bun run format               # oxfmt (write); format:check verifies
-bun run check                # oxlint + oxfmt --check (verify only, same as CI)
+bun run verify               # oxlint + oxfmt --check (verify only, same as CI)
 bun run generate:module -- --name=<kebab-name> [--expose]
 node scaffold/generate.js --service=mf-template --target=. --force   # regenerate .gitlab-ci.yml
 ```
@@ -86,6 +87,9 @@ node scaffold/generate.js --service=mf-template --target=. --force   # regenerat
 ## What NOT to do
 
 - No npm/yarn/pnpm, no `package-lock.json`: the lockfile is `bun.lock`.
+- Script names say what they do, not the tool (`format`, `format:check`, `verify`, `lint`), and no
+  script is named `check`: it would shadow Bun's type checker (`bun check`). Pinned by
+  `scripts/package-scripts.test.js`.
 - Oxc mirrors backtemplate's Biome rules: 80 columns, single quotes, sorted imports, object keys
   (`sort-keys`) and interface members (`perfectionist/sort-interfaces`) in natural order, all
   autofixed by `bun run lint:fix` and the pre-commit.

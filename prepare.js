@@ -1,5 +1,6 @@
 // `prepare` lifecycle entry point (`bun install`). These steps bootstrap the
-// LOCAL development environment: git hooks (husky) and the local `.env`.
+// LOCAL development environment: git hooks (husky), the local `.env` and the
+// CodeGraph index of the repo.
 // CI gains nothing from them (an ephemeral checkout never commits, and the
 // pipeline writes `.env` itself), so they are skipped when `CI` is set, or
 // in any other non-interactive context with `SKIP_PREPARE=1`.
@@ -15,7 +16,7 @@ function isEnabled(name) {
 
 if (isEnabled('CI') || isEnabled('SKIP_PREPARE')) {
   console.info(
-    '[prepare] CI detected — skipping local environment bootstrap (husky/env).',
+    '[prepare] CI detected — skipping local environment bootstrap (husky/env/codegraph).',
   );
   process.exit(0);
 }
@@ -36,3 +37,4 @@ const runner = hasBun() ? 'bun' : 'node';
 // easy to find and to run alone for debugging.
 execSync(`${runner} scripts/prepare-husky.js`, { stdio: 'inherit' });
 execSync(`${runner} scripts/prepare-env.js`, { stdio: 'inherit' });
+execSync(`${runner} scripts/prepare-codegraph.js`, { stdio: 'inherit' });

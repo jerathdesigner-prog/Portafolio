@@ -47,7 +47,8 @@ NOT rewritten to the template's standalone style; only their host integration is
 - **Scripts and tooling align to front-template, DEFAULT on every merge.** Re-read the template's
   current `package.json` scripts (names drift — never copy from this doc). The fork ends with the
   same script NAMES and COMMANDS for `start`, `build`, `watch`, `test`, `test:watch`,
-  `test:scripts`, `lint`, `lint:fix`, `format`, `check`, `generate:module`, `env`, `prepare`.
+  `test:scripts`, `lint`, `lint:fix`, `format`, `format:check`, `verify`, `generate:module`,
+  `env`, `prepare`.
   Fork-only scripts survive only when the template has no equivalent (e.g. `test:unit`,
   `test:browser`, `test:ci`); keep the fork's extra dependencies. Report a script alignment table.
 - **The test runner is Vitest (`@angular/build:unit-test`).** A fork still on Karma/Jasmine migrates
@@ -155,7 +156,7 @@ NOT rewritten to the template's standalone style; only their host integration is
 5. **Run the gate** (`references/post-merge-fixups.md`):
    - `NODE_ENV=DEV SKIP_ENV_FETCH=1 bun run test` (unit + `test:scripts`)
    - `NODE_ENV=PROD SKIP_ENV_FETCH=1 bun run build`
-   - `bun run lint` / `bun run check`
+   - `bun run lint` / `bun run verify`
    - inspect `dist/browser/remoteEntry.json`: every expose, shared `@angular/core` version/
      `requiredVersion`, `buildNotificationsEndpoint`
    - start the dev server on the fork port, `curl /remoteEntry.json`, load the exposed route in the

@@ -13,6 +13,7 @@
 
 # Dependencies and caches (reinstalled inside the image)
 node_modules
+.codegraph
 .bun-cache
 .angular
 dist-test

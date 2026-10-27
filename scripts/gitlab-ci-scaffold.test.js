@@ -210,3 +210,19 @@ test('test:unit installs Chromium only when the repo uses Playwright', () => {
     'Chromium must be installed before the tests run',
   );
 });
+
+test('every script the pipeline runs exists in package.json', () => {
+  const file = readConfig().files.find((entry) => entry.id === 'gitlab-ci');
+  const output = render(file, 'mf-template', '.');
+  const { scripts } = JSON.parse(
+    fs.readFileSync(path.join(root, 'package.json'), 'utf8'),
+  );
+  const called = [...output.matchAll(/\b(?:npm|bun) run ([\w:-]+)/g)].map(
+    (match) => match[1],
+  );
+
+  assert.ok(called.length > 0, 'the pipeline runs no package.json script');
+  for (const name of called) {
+    assert.ok(name in scripts, `the pipeline runs a missing script: ${name}`);
+  }
+});
