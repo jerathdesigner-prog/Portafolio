@@ -13,7 +13,11 @@
     "importHelpers": true,
     "target": "ES2022",
     "module": "preserve",
-    "types": ["vitest/globals", "node", "@types/bun"]
+    "types": ["vitest/globals", "node", "@types/bun"],
+    "paths": {
+      "@src/*": ["./src/*"],
+      "src/*": ["./src/*"]
+    }
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

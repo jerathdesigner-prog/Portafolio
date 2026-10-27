@@ -35,6 +35,13 @@ export default withNativeFederation({
     }),
   },
 
+  // tsconfig `paths` (e.g. `src/*`, `@src/*`) are import aliases of THIS app,
+  // not libraries. Without an explicit list, Native Federation shares every
+  // path mapping and compiles those folders as a separate "mapping-bundle",
+  // outside their NgModules/components (NG8002 on bindings of imported
+  // directives). List a mapping here only for a real shared library.
+  sharedMappings: [],
+
   skip: [
     'rxjs/ajax',
     'rxjs/fetch',
