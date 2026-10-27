@@ -1,8 +1,8 @@
-import { defineConfig } from 'oxlint';
+import type { OxlintConfig } from 'oxlint';
 
 // Linter of this repo (replaces Biome).
 // Docs: https://oxc.rs/docs/guide/usage/linter/config.html
-export default defineConfig({
+const config: OxlintConfig = {
   plugins: ['typescript', 'unicorn', 'oxc', 'import', 'vitest'],
   env: { browser: true, es2024: true },
   categories: {
@@ -28,4 +28,10 @@ export default defineConfig({
       env: { node: true },
     },
   ],
-});
+};
+
+// CommonJS export: package.json has no "type": "module" (the repo scripts are
+// CommonJS), so an ESM `export default` makes Node re-parse this file with a
+// MODULE_TYPELESS_PACKAGE_JSON warning on every lint/format run. `import type`
+// above is erased by Node's type stripping, so the file stays plain CommonJS.
+module.exports = config;

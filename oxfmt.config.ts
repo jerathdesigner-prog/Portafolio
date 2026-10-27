@@ -1,8 +1,8 @@
-import { defineConfig } from 'oxfmt';
+import type { OxfmtConfig } from 'oxfmt';
 
 // Formatter of this repo (replaces Biome). Prettier-compatible output.
 // Docs: https://oxc.rs/docs/guide/usage/formatter/config.html
-export default defineConfig({
+const config: OxfmtConfig = {
   printWidth: 100,
   tabWidth: 2,
   useTabs: false,
@@ -28,4 +28,10 @@ export default defineConfig({
     // Hand-written docs: padding Markdown tables only adds noise.
     '**/*.md',
   ],
-});
+};
+
+// CommonJS export: package.json has no "type": "module" (the repo scripts are
+// CommonJS), so an ESM `export default` makes Node re-parse this file with a
+// MODULE_TYPELESS_PACKAGE_JSON warning on every lint/format run. `import type`
+// above is erased by Node's type stripping, so the file stays plain CommonJS.
+module.exports = config;

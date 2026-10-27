@@ -81,8 +81,8 @@ node scaffold/generate.js --service=mf-template --target=. --force   # regenerat
 ## What NOT to do
 
 - No npm/yarn/pnpm, no `package-lock.json`: the lockfile is `bun.lock`.
-- No ESLint/Prettier/Biome configuration: Oxc is the linter (`oxlint.config.mts`) and formatter
-  (`oxfmt.config.mts`); a husky pre-commit formats staged files with oxfmt and reports oxlint
+- No ESLint/Prettier/Biome configuration: Oxc is the linter (`oxlint.config.ts`) and formatter
+  (`oxfmt.config.ts`); a husky pre-commit formats staged files with oxfmt and reports oxlint
   findings without blocking. CI `lint`/`format:check` are advisory (`allow_failure: true`): forks
   carry legacy findings, so they warn instead of blocking `build_app`.
 - Do not edit `.gitlab-ci.yml` by hand: it is generated from `scaffold/templates/gitlab-ci.yml`
