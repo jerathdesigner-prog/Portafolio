@@ -23,6 +23,11 @@ const fs = require('node:fs');
 const path = require('node:path');
 const dotenv = require('dotenv');
 const env = require('./scripts/env-helper');
+// Node 26 ships Temporal; older runtimes fall back to the polyfill the app
+// already depends on, without installing it globally.
+const { Temporal } = globalThis.Temporal
+  ? globalThis
+  : require('temporal-polyfill');
 
 const ROOT = __dirname;
 const ENV_FILE = path.join(ROOT, '.env');

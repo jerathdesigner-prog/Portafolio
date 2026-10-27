@@ -99,3 +99,28 @@ test('without --example, .env is used as before', () => {
     fs.rmSync(dir, { force: true, recursive: true });
   }
 });
+
+test('runs on a Node without native Temporal (falls back to the polyfill)', () => {
+  const dir = sandbox();
+  try {
+    // Simulates Node < 26, which has no global Temporal.
+    const strip = path.join(dir, 'strip-temporal.js');
+    fs.writeFileSync(strip, 'delete globalThis.Temporal;\n');
+    const env = { ...process.env, SKIP_ENV_FETCH: '1' };
+    for (const key of ['API_URL', 'SECRET_KEY', 'ENTITY_ROOT', 'NODE_ENV']) {
+      delete env[key];
+    }
+    execFileSync(
+      process.execPath,
+      ['--require', strip, 'load-env.js', '--example'],
+      { cwd: dir, env, stdio: 'pipe' },
+    );
+    const output = fs.readFileSync(
+      path.join(dir, 'src/environments/environment.ts'),
+      'utf8',
+    );
+    assert.match(output, /Generated: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z/);
+  } finally {
+    fs.rmSync(dir, { force: true, recursive: true });
+  }
+});
