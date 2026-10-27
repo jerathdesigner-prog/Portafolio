@@ -132,7 +132,8 @@
           "builder": "@angular/build:unit-test",
           "options": {
             "buildTarget": "mf-template:build-test:development",
-            "tsConfig": "tsconfig.spec.json"
+            "tsConfig": "tsconfig.spec.json",
+            "runnerConfig": "vitest.config.ts"
           }
         }
       }

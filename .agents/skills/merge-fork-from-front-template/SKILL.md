@@ -50,6 +50,18 @@ NOT rewritten to the template's standalone style; only their host integration is
   `test:scripts`, `lint`, `lint:fix`, `format`, `check`, `generate:module`, `env`, `prepare`.
   Fork-only scripts survive only when the template has no equivalent (e.g. `test:unit`,
   `test:browser`, `test:ci`); keep the fork's extra dependencies. Report a script alignment table.
+- **The test runner is Vitest (`@angular/build:unit-test`).** A fork still on Karma/Jasmine migrates
+  as part of aligning `test`: follow `references/vitest-migration.md` (schematic, zone.js vitest
+  patch, `aot: false` for NgModule specs, lib-components inline, leftover fixes). Never delete or
+  skip specs to get green.
+- **Propose upstream candidates, proactively.** front-template must keep evolving into the best
+  base for new fronts and micro-frontends. While merging, watch for fork changes that are GENERAL
+  (fix, tooling, config, CI, shared plumbing, test setup, docs) and would help every MF — e.g. a
+  build/test fix any fork would hit, a missing `.gitignore` entry, a safer default. List them in the
+  report as "Upstream candidates" (file, what, why it is general). Never edit front-template from a
+  fork merge on your own: the user decides, then it lands in front-template with its tests/docs and
+  flows back to every fork on the next merge. Business code, fork names/ports/exposes and
+  fork-only env vars are never candidates.
 - **Native Federation only. No webpack/Module Federation config.** The fork's
   `federation.config.mjs` keeps the template policy (strict Angular/rxjs singletons, `skip` list,
   `denseChunking`) plus the fork's `name` and `exposes`. `tsconfig.federation.json` is the union of
@@ -162,8 +174,8 @@ NOT rewritten to the template's standalone style; only their host integration is
 Report: merge status (still in progress, no commit SHA), a conflict table (file → ours/theirs/
 hand-merged + why), the version and script alignment tables, the NF contract checklist, gate results
 (tests/build/lint), `remoteEntry.json` evidence, dev-server/host verification (shared version,
-exposed route, no NG0203), the untouchables diff (business modules empty), and proposed review
-slices for the user's commits. Never claim "done" without actually running the commands; never call
+exposed route, no NG0203), the untouchables diff (business modules empty), the "Upstream
+candidates" for front-template (or "none found"), and proposed review slices for the user's commits. Never claim "done" without actually running the commands; never call
 the merge "complete" — only "conflicts resolved and staged for review".
 
 ## References
@@ -175,3 +187,5 @@ the merge "complete" — only "conflicts resolved and staged for review".
   build notifications and HMR.
 - `references/post-merge-fixups.md` — conflict-specific fixups (env/CI/Docker/shared/config),
   gate commands, recurring failures and host-side verification.
+- `references/vitest-migration.md` — Karma/Jasmine fork → Vitest: dependencies, `build-test`,
+  zone.js patch, `aot: false`, lib-components inline and the schematic's leftovers.

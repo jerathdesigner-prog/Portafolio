@@ -1,3 +1,4 @@
+import { provideZonelessChangeDetection } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 
 import type { TemplateInterface } from '../../interfaces/template.interface';
@@ -15,6 +16,9 @@ describe('TemplateTableComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TemplateTableComponent],
+      // Explicitly zoneless: forks that load zone.js for fakeAsync specs would
+      // otherwise switch TestBed to zone change detection and render nothing.
+      providers: [provideZonelessChangeDetection()],
     }).compileComponents();
     fixture = TestBed.createComponent(TemplateTableComponent);
     element = fixture.nativeElement as HTMLElement;

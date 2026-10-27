@@ -33,3 +33,8 @@ git merge template/main --allow-unrelated-histories   # flag needed only for the
 
 After resolving: `bun install && bun run lint && bun run test && bun run build`, and check
 `dist/browser/remoteEntry.json` still lists every exposed key.
+
+Report the fork's general changes (fixes, tooling, config, CI, test setup) as upstream candidates
+for front-template; they land here only after the user approves them. A fork still on
+Karma/Jasmine migrates to Vitest with
+[`references/vitest-migration.md`](skills/merge-fork-from-front-template/references/vitest-migration.md).

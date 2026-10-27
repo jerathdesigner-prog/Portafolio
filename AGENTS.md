@@ -33,6 +33,11 @@ live in [`.agents/`](.agents/); open the relevant doc before touching that area.
   from copy-paste: `bun run generate:module -- --name=<kebab-name> [--expose]`.
 - ⚠️ [Tests next to the file they cover, written first when behavior changes](.agents/testing.md).
 - ⚠️ Never commit `.env`, `.npmrc`, `src/environments/*`, `dist/` — they are gitignored on purpose.
+- ⚠️ **front-template keeps evolving from its forks.** When working in a fork (above all while
+  merging front-template into it), if a change is general — a fix, tooling, config, CI, shared
+  plumbing, test setup — and would help every new front/MF, propose upstreaming it to
+  front-template. Propose, never apply it there on your own; see the
+  [merge skill](.agents/skills/merge-fork-from-front-template/SKILL.md).
 
 ## Capability map
 
