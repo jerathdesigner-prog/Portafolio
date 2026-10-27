@@ -21,6 +21,7 @@ node scaffold/generate.js --service=<mf-name> --target=<path> [options]
 | Token                       | Value                                                    | Override                  |
 | --------------------------- | -------------------------------------------------------- | ------------------------- |
 | `SERVICE_NAME`              | `mf-virtual-office` (service key in the server compose)  | `--service-name=`         |
+| `SERVICE_NAME_DEV/QA/PREPROD` | `SERVICE_NAME`, per environment (each deploy job uses its own) | `--service-name-dev=` etc. |
 | `CONTAINER_NAME`            | `mf-virtual-office`                                      | `--container-name=`       |
 | `COMPOSE_IMAGE_VAR`         | `FRONT_VIRTUAL_OFFICE_IMAGE_COMMIT`                      | `--compose-image-var=`    |
 | `COMPOSE_FILE_DEV/QA/PREPROD` | `<composeBasePaths.*>/mf-virtual-office.yml`           | `--compose-base-dev=` etc. |
@@ -33,7 +34,8 @@ repeat the base ones (`NODE_ENV`, `API_URL`, `ENTITY_ROOT`, `SECRET_KEY`); the v
 CI/CD variables with the same name.
 
 Overrides are for repos whose server compose deviates from the pattern (e.g. frontcontainer:
-`--service=mf-container --service-name=container`). They are recorded in the generated banner's
+`--service=mf-container --service-name=container`). When only one server keys the app differently,
+override just that environment: frontcore uses `--service-name=core --service-name-dev=mf-core`. They are recorded in the generated banner's
 `Regenerate:` command, so that line alone reproduces the file.
 
 ## Regenerate to update

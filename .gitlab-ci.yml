@@ -40,8 +40,10 @@ default:
 variables:
   # ---- Per-repo values (derived by scaffold/generate.js) ------------------
   RUNNER_TAG: 'nc_core'
-  # Service key in the server compose (docker compose up <SERVICE_NAME>).
-  SERVICE_NAME: 'mf-template'
+  # Service key in each server compose (docker compose up <SERVICE_NAME>).
+  SERVICE_NAME_DEV: 'mf-template'
+  SERVICE_NAME_QA: 'mf-template'
+  SERVICE_NAME_PREPROD: 'mf-template'
   # container_name in the server compose (used only by the docker ps check).
   CONTAINER_NAME: 'mf-template'
   # Variable the server compose reads for the image:
@@ -386,6 +388,7 @@ deploy:development:
   variables:
     DEPLOY_HOST: '$DEPLOY_HOST_DEV'
     COMPOSE_FILE: '$COMPOSE_FILE_DEV'
+    SERVICE_NAME: '$SERVICE_NAME_DEV'
   rules:
     - if: '$CI_COMMIT_BRANCH == "development"'
 
@@ -396,6 +399,7 @@ deploy:quality:
   variables:
     DEPLOY_HOST: '$DEPLOY_HOST_QA'
     COMPOSE_FILE: '$COMPOSE_FILE_QA'
+    SERVICE_NAME: '$SERVICE_NAME_QA'
   rules:
     - if: '$CI_COMMIT_BRANCH == "quality"'
 
@@ -406,6 +410,7 @@ deploy:pre-production:
   variables:
     DEPLOY_HOST: '$DEPLOY_HOST_PREPROD'
     COMPOSE_FILE: '$COMPOSE_FILE_PREPROD'
+    SERVICE_NAME: '$SERVICE_NAME_PREPROD'
     # nginx reverse-proxies pre-production; restart it to re-resolve upstreams.
     RESTART_NGINX: 'true'
   rules:

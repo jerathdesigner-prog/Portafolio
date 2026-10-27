@@ -63,7 +63,8 @@ test('render records overrides in the regenerate command', () => {
     output,
     /^# Regenerate: node scaffold\/generate\.js --service=mf-container --target=\. --service-name=container --force$/m,
   );
-  assert.match(output, /SERVICE_NAME: 'container'/);
+  assert.match(output, /^ {2}SERVICE_NAME_DEV: 'container'$/m);
+  assert.match(output, /^ {2}SERVICE_NAME_PREPROD: 'container'$/m);
 });
 
 test('derive applies explicit overrides for repos that deviate', () => {
@@ -75,6 +76,47 @@ test('derive applies explicit overrides for repos that deviate', () => {
   assert.equal(tokens.SERVICE_NAME, 'container');
   assert.equal(tokens.CONTAINER_NAME, 'mf-container');
   assert.equal(tokens.COMPOSE_FILE_DEV, '/srv/docker/mf-container.yml');
+});
+
+// The deploy job of an environment, from its name to the next top-level key.
+const deployJob = (output, env) =>
+  output.split(`\ndeploy:${env}:\n`)[1]?.split(/\n\S/)[0] ?? '';
+
+test('each deploy job targets the service name of its environment', () => {
+  const file = readConfig().files.find((entry) => entry.id === 'gitlab-ci');
+  const output = render(file, 'mf-core', '.', {
+    'service-name': 'core',
+    'service-name-dev': 'mf-core',
+  });
+
+  assert.match(output, /^ {2}SERVICE_NAME_DEV: 'mf-core'$/m);
+  assert.match(output, /^ {2}SERVICE_NAME_QA: 'core'$/m);
+  assert.match(output, /^ {2}SERVICE_NAME_PREPROD: 'core'$/m);
+  for (const [env, variable] of [
+    ['development', 'SERVICE_NAME_DEV'],
+    ['quality', 'SERVICE_NAME_QA'],
+    ['pre-production', 'SERVICE_NAME_PREPROD'],
+  ]) {
+    assert.match(
+      deployJob(output, env),
+      new RegExp(`^ {4}SERVICE_NAME: '\\$${variable}'$`, 'm'),
+      `deploy:${env} must use ${variable}`,
+    );
+  }
+  assert.match(
+    output,
+    /--service-name=core --service-name-dev=mf-core --force$/m,
+  );
+});
+
+test('without per-environment overrides every environment uses the service name', () => {
+  const tokens = derive('mf-core', readConfig().shared, {
+    'service-name': 'core',
+  });
+
+  assert.equal(tokens.SERVICE_NAME_DEV, 'core');
+  assert.equal(tokens.SERVICE_NAME_QA, 'core');
+  assert.equal(tokens.SERVICE_NAME_PREPROD, 'core');
 });
 
 test('derive rejects a service without the mf- prefix', () => {

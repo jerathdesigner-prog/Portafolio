@@ -28,6 +28,8 @@ Options:
 Per-token overrides (only for a repo that deviates from the pattern):
   --service-name=  --container-name=  --compose-image-var=  --runner-tag=
   --compose-base-dev=  --compose-base-qa=  --compose-base-preprod=  --npm-project-id=
+  --service-name-dev=  --service-name-qa=  --service-name-preprod=
+                        (compose service key of one environment; default --service-name)
 
 Fork-specific build variables (values come from GitLab CI/CD variables of the same name):
   --extra-env-keys=KEY[,KEY]   Extra KEY=$KEY lines in build_app's .env heredoc.
@@ -65,6 +67,7 @@ function derive(service, shared, overrides = {}) {
     throw new Error(`service must start with "${SERVICE_PREFIX}"`);
   }
   const bare = service.slice(SERVICE_PREFIX.length);
+  const serviceName = overrides['service-name'] ?? service;
   const composeFile = (env) =>
     `${overrides[`compose-base-${env}`] ?? shared.composeBasePaths[env]}/${service}.yml`;
 
@@ -79,7 +82,11 @@ function derive(service, shared, overrides = {}) {
     EXTRA_ENV_LINES: extraEnvLines(overrides['extra-env-keys']),
     NEOCORE_NPM_PROJECT_ID: overrides['npm-project-id'] ?? shared.npmProjectId,
     RUNNER_TAG: overrides['runner-tag'] ?? shared.runnerTag,
-    SERVICE_NAME: overrides['service-name'] ?? service,
+    SERVICE_NAME: serviceName,
+    // Some servers key the same app differently in their compose.
+    SERVICE_NAME_DEV: overrides['service-name-dev'] ?? serviceName,
+    SERVICE_NAME_PREPROD: overrides['service-name-preprod'] ?? serviceName,
+    SERVICE_NAME_QA: overrides['service-name-qa'] ?? serviceName,
   };
 }
 
@@ -151,6 +158,9 @@ function render(file, service, targetLabel, overrides = {}) {
 
 const OVERRIDE_FLAGS = [
   'service-name',
+  'service-name-dev',
+  'service-name-qa',
+  'service-name-preprod',
   'container-name',
   'compose-image-var',
   'runner-tag',
