@@ -1,0 +1,41 @@
+JERATH MOREIRA - PUBLICACIÓN COMPLETA EN CLOUDFLARE
+====================================================
+
+CONTENIDO DEL ZIP
+- public/ : portafolio aprobado (con reconocimientos y animaciones) + Dashboard.
+- src/ : backend Cloudflare Workers con base D1 y archivos R2.
+- DEPLOY_CLOUDFLARE.bat : asistente Windows de instalación y despliegue.
+- ACTUALIZAR_CLOUDFLARE.bat : redespliega el código si más adelante se edita.
+
+PREPARATIVOS
+1. Tu dominio jerathmoreira.com debe aparecer como ACTIVE en Cloudflare > Domains.
+2. Tener Node.js LTS: https://nodejs.org/
+3. Cloudflare debe tener R2 habilitado. R2 puede exigir activar facturación.
+4. Extrae completamente el ZIP en una carpeta de Windows.
+
+INSTALACIÓN
+1. Haz doble clic en DEPLOY_CLOUDFLARE.bat.
+2. Confirma la autorización de Cloudflare que abre el navegador.
+3. El programa crea o reutiliza base D1 y un bucket R2 en tu cuenta.
+4. Al pedir la contraseña, escoge una NUEVA y segura (12+ caracteres).
+5. El programa generará en Cloudflare una clave secreta de sesión.
+6. Al terminar, prueba la dirección workers.dev mostrada en la consola.
+7. En Cloudflare: Workers & Pages > jerathmoreira-cms > Settings > Domains & Routes > Add > Custom Domain > jerathmoreira.com.
+8. Si existe un registro DNS que impide conectar el dominio, revisa cuál es antes de reemplazarlo. Cloudflare debe ser el proveedor DNS activo de jerathmoreira.com.
+9. Para usar www.jerathmoreira.com, añade también un Custom Domain y, si quieres, una regla de redirección a la versión sin www.
+
+WEB PUBLICA: https://jerathmoreira.com/
+DASHBOARD: https://jerathmoreira.com/admin
+USUARIO: jerath
+CONTRASEÑA: la que estableciste durante el despliegue.
+
+IMPORTANTE
+- No compartas contraseñas, tokens ni claves con ChatGPT.
+- Nunca subas la carpeta local 'storage' ni 'node_modules' a un repositorio público.
+- Esta versión trae los servicios y proyectos de ejemplo originales, pero NO copia automáticamente archivos subidos en el Dashboard local de tu laptop.
+- Los reconocimientos están incluidos directamente en la plantilla de la web aprobada. Las altas/bajas de reconocimientos siguen requiriendo modificar código; el Dashboard gestiona servicios, proyectos y biblioteca multimedia.
+- Por seguridad, cada archivo del Dashboard puede pesar hasta 100 MB en este instalador; para videos mayores se puede ampliar el sistema con R2 multipart.
+- Cloudflare puede cobrar por uso y exigir habilitar la facturación de R2. Comprueba el plan y límites antes de publicar muchos videos.
+- D1 guarda el contenido; R2 guarda archivos. Haz copias de seguridad periódicas de ambos.
+- No puede funcionar el servidor Python local en Cloudflare Pages estático: este paquete utiliza un backend nativo Cloudflare en su lugar.
+- El despliegue usa tu sesión Cloudflare autorizada. Los archivos por sí solos NO publican automáticamente el dominio.
