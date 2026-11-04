@@ -11,5 +11,6 @@ On a merge from `front-template` this file always keeps the fork's version.
 | Public portfolio content (also: services, projects, media, /api/public) | `PortfolioService.load()` (Worker-injected `window.jmPortfolioData`, else `/api/public`) | `src/app/modules/portfolio/services/portfolio.service.ts` | `worker/index.mjs` |
 | Backend, CMS, uploads (also: D1, R2, /admin, login, Cloudflare) | Cloudflare Worker serving the Angular build and the API | `worker/index.mjs`, `wrangler.jsonc` | `README.md` > Portfolio |
 | Scroll scenes, menu, project dialog, brief form | Legacy vanilla script started by `PortfolioHomePage` | `src/app/modules/portfolio/legacy/portfolio-motion.ts` | file header |
+| Deploy to Cloudflare (also: publicar, wrangler deploy) | Skill `deploy-cloudflare` (`.claude/skills` links to it) | `bun run deploy` | [`.agents/skills/deploy-cloudflare/SKILL.md`](skills/deploy-cloudflare/SKILL.md) |
 
 <!-- capability-map:end -->
