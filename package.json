@@ -21,6 +21,7 @@
     "generate:ci": "node scaffold/generate.js",
     "format:check": "oxfmt --check",
     "test:worker": "node tests/smoke.mjs",
+    "worker:login": "wrangler login",
     "worker:dev": "wrangler dev",
     "deploy": "wrangler deploy"
   },
