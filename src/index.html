@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <script>
+      document.documentElement.classList.add('jm-preloading');
+    </script>
+    <base href="/" />
+    <meta charset="utf-8" />
+    <meta
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+      name="viewport"
+    />
+    <meta content="#23312D" name="theme-color" />
+    <meta
+      content="Jerath Moreira, diseñador gráfico y director creativo. Flyers, social media, identidades visuales y edición de videos."
+      name="description"
+    />
+    <title>Jerath Moreira — Diseño &amp; Dirección Creativa</title>
+    <link rel="icon" type="image/png" href="/static/media/d087ebf02905.png" />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+  </head>
+  <body>
+    <!-- Preloader independiente: la página de abajo sigue preparando su contenido. -->
+    <div
+      class="jm-preloader"
+      id="jm-preloader"
+      role="status"
+      aria-label="Loading portfolio"
+      aria-live="polite"
+    >
+      <div class="jm-preloader__center">
+        <div class="jm-preloader__track" aria-hidden="true">
+          <span class="jm-preloader__fill" id="jm-preloader-fill"></span>
+        </div>
+        <div class="jm-preloader__label">
+          LOADING<span class="jm-preloader__dots" aria-hidden="true"></span>
+        </div>
+      </div>
+    </div>
+
+    <script id="jm-preloader-script">
+      /* Barra vinculada a hitos reales: DOM, tipografía, imagen hero y carga del documento.
+   No se simula un porcentaje ni se impone una espera de 10-15 segundos. */
+      (() => {
+        'use strict';
+        const loader = document.getElementById('jm-preloader');
+        const fill = document.getElementById('jm-preloader-fill');
+        if (!loader || !fill) return;
+        const startedAt = performance.now();
+        const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const stages = [
+          { weight: 15, promise: Promise.resolve() },
+          {
+            weight: 20,
+            promise: document.fonts ? document.fonts.ready : Promise.resolve(),
+          },
+          {
+            weight: 30,
+            promise: (async () => {
+              const img =
+                document.getElementById('hero-character') ||
+                (await new Promise((resolve) => {
+                  // Angular renders the hero after this script runs: wait for it.
+                  const observer = new MutationObserver(() => {
+                    const found = document.getElementById('hero-character');
+                    if (found) {
+                      observer.disconnect();
+                      resolve(found);
+                    }
+                  });
+                  observer.observe(document.documentElement, {
+                    childList: true,
+                    subtree: true,
+                  });
+                  setTimeout(() => {
+                    observer.disconnect();
+                    resolve(null);
+                  }, 8000);
+                }));
+              if (!img) return;
+              if (typeof img.decode === 'function') {
+                try {
+                  await img.decode();
+                } catch (_) {
+                  /* onerror: no bloquear el acceso */
+                }
+              } else if (!img.complete) {
+                await new Promise((resolve) => {
+                  img.addEventListener('load', resolve, { once: true });
+                  img.addEventListener('error', resolve, { once: true });
+                });
+              }
+            })(),
+          },
+          {
+            weight: 35,
+            promise:
+              document.readyState === 'complete'
+                ? Promise.resolve()
+                : new Promise((resolve) =>
+                    window.addEventListener('load', resolve, { once: true }),
+                  ),
+          },
+        ];
+        let completedWeight = 0;
+        let finished = false;
+        const complete = () => {
+          if (finished) return;
+          finished = true;
+          fill.style.width = '100%';
+          const minVisible = reduced ? 0 : 900;
+          const remaining = Math.max(
+            0,
+            minVisible - (performance.now() - startedAt),
+          );
+          setTimeout(
+            () => {
+              loader.classList.add('jm-revealing');
+              const remove = () => {
+                if (!loader.isConnected) return;
+                loader.remove();
+                document.documentElement.classList.remove('jm-preloading');
+              };
+              loader.addEventListener(
+                'animationend',
+                (e) => {
+                  if (e.target === loader) remove();
+                },
+                { once: true },
+              );
+              // Si el navegador no soporta la máscara animada, nunca dejar una pantalla bloqueada.
+              setTimeout(remove, reduced ? 300 : 1950);
+            },
+            Math.max(remaining, reduced ? 0 : 390),
+          );
+        };
+        Promise.all(
+          stages.map((stage) =>
+            Promise.resolve(stage.promise)
+              .catch(() => {})
+              .then(() => {
+                completedWeight += stage.weight;
+                fill.style.width = completedWeight + '%';
+              }),
+          ),
+        ).then(complete);
+        // Salvaguarda para imágenes o fuentes fallidas: la web continúa siendo accesible.
+        setTimeout(complete, 9500);
+      })();
+    </script>
+    <app-root></app-root>
+  </body>
+</html>

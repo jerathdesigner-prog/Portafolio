@@ -1,11 +1,75 @@
 {
-  "name": "jerathmoreira-cloudflare-cms",
+  "name": "jerathmoreira-portfolio",
   "version": "1.0.0",
   "private": true,
-  "type": "module",
+  "description": "Jerath Moreira portfolio: Angular front-end served by a Cloudflare Worker (D1 + R2 CMS)",
   "scripts": {
-    "dev": "wrangler dev",
+    "ng": "ng",
+    "prepare": "node prepare.js",
+    "env": "node load-env.js",
+    "start": "node load-env.js && ng serve",
+    "build": "node load-env.js && ng build",
+    "watch": "node load-env.js && ng build --watch --configuration development",
+    "test": "SKIP_ENV_FETCH=1 node load-env.js --example && ng test --watch=false && bun run test:scripts",
+    "test:watch": "SKIP_ENV_FETCH=1 node load-env.js --example && ng test",
+    "test:scripts": "node --test 'scripts/**/*.test.js'",
+    "lint": "oxlint --deny-warnings",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt",
+    "verify": "oxlint --deny-warnings && oxfmt --check",
+    "generate:module": "node scripts/generate-module.js",
+    "generate:ci": "node scaffold/generate.js",
+    "format:check": "oxfmt --check",
+    "test:worker": "node tests/smoke.mjs",
+    "worker:dev": "wrangler dev",
     "deploy": "wrangler deploy"
   },
-  "devDependencies": {"wrangler": "^4.0.0"}
+  "dependencies": {
+    "@angular-architects/native-federation": "22.2.2",
+    "@angular/common": "22.2.1",
+    "@angular/compiler": "22.2.1",
+    "@angular/core": "22.2.1",
+    "@angular/forms": "22.2.1",
+    "@angular/platform-browser": "22.2.1",
+    "@angular/router": "22.2.1",
+    "encrypt-storage": "3.0.4",
+    "es-module-shims": "2.8.4",
+    "ngx-device-detector": "^12.0.0",
+    "pubsub-js": "^1.9.5",
+    "rxjs": "~7.8.2",
+    "temporal-polyfill": "1.0.6",
+    "tslib": "^2.8.1",
+    "zone.js": "0.16.3"
+  },
+  "devDependencies": {
+    "@angular/build": "22.2.1",
+    "@angular/cli": "22.2.1",
+    "@angular/compiler-cli": "22.2.1",
+    "@colbymchenry/codegraph": "1.6.2",
+    "@softarc/native-federation-orchestrator": "^4.6.0",
+    "@types/bun": "^1.4.3",
+    "@types/node": "^22.13.4",
+    "@types/pubsub-js": "^1.8.6",
+    "dotenv": "^17.4.2",
+    "eslint-plugin-perfectionist": "^5.12.1",
+    "husky": "^9.1.7",
+    "jsdom": "30.0.1",
+    "lint-staged": "^17.6.0",
+    "oxfmt": "^0.74.0",
+    "oxlint": "^1.89.0",
+    "typescript": "~6.0.3",
+    "vitest": "5.0.1",
+    "wrangler": "^4.0.0"
+  },
+  "lint-staged": {
+    "*.{ts,mts,cts,js,mjs,cjs}": [
+      "sh -c 'oxlint --fix \"$@\" || true' --",
+      "oxfmt --no-error-on-unmatched-pattern"
+    ],
+    "*.{html,scss,css,json,jsonc,yml,yaml}": "oxfmt --no-error-on-unmatched-pattern"
+  },
+  "engines": {
+    "node": ">=26.12.1"
+  },
+  "packageManager": "bun@1.4.4"
 }

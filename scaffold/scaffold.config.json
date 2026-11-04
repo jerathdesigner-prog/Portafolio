@@ -1,0 +1,18 @@
+{
+  "files": [
+    {
+      "id": "gitlab-ci",
+      "output": ".gitlab-ci.yml",
+      "template": "templates/gitlab-ci.yml"
+    }
+  ],
+  "shared": {
+    "composeBasePaths": {
+      "dev": "/root/neocore/FRONTEND-NEOCORE/docker",
+      "qa": "/root/citytech/neocore/FRONTEND/docker",
+      "preprod": "/root/easycore/neo-core/FRONTEND/docker"
+    },
+    "npmProjectId": "140",
+    "runnerTag": "nc_core"
+  }
+}

@@ -12,8 +12,8 @@ if not exist "wrangler.jsonc" (
   pause
   exit /b 1
 )
-if not exist "src\index.mjs" (
-  echo ERROR: Falta el backend original src\index.mjs.
+if not exist "worker\index.mjs" (
+  echo ERROR: Falta el backend original worker\index.mjs.
   pause
   exit /b 1
 )
@@ -26,6 +26,12 @@ if errorlevel 1 (
 echo Actualizando solo los archivos de la web.
 echo No elimina ni reinicia D1 ni R2.
 echo.
+call npm.cmd install
+if errorlevel 1 (
+  echo ERROR: No se pudieron instalar las dependencias.
+  pause
+  exit /b 1
+)
 call npx.cmd wrangler deploy
 set "RESULT=%ERRORLEVEL%"
 echo.
