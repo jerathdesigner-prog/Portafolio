@@ -1,5 +1,4 @@
 import { SEED } from './seed.mjs';
-import { LEGACY_ART } from './legacy_art.mjs';
 
 // Backend cloud nativo: Cloudflare Workers + D1 (contenido) + R2 (multimedia).
 // No instala Python ni expone los archivos de tu computadora.
@@ -69,32 +68,14 @@ function publicData(data){
   for(const p of projects){if(p.coverMediaId)refs.add(p.coverMediaId);for(const r of p.media||[])if(r.mediaId)refs.add(r.mediaId);}
   return {services,projects,media:[...refs].map(mid=>mediaPublic(data,mid)).filter(Boolean)};
 }
-function coverHtml(data,id,slug){
-  const m=mediaPublic(data,id);
-  if(m){const url=esc(m.url);if(m.kind==='video')return `<span class="artwork"><video muted playsinline preload="metadata" src="${url}" style="width:100%;height:100%;object-fit:cover" aria-hidden="true"></video></span>`;
-    if(m.kind==='image')return `<span class="artwork"><img src="${url}" alt="" loading="lazy" /></span>`;
-  }
-  return LEGACY_ART[slug]||'<span class="artwork portfolio-generic-cover"><strong>JM ✳</strong></span>';
-}
-function renderPanel(s,projects,data,n){
-  // En Servicios, cada proyecto se abre al pulsar su titulo. No se muestran
-  // etiquetas a la derecha (como "Proyecto") ni flechas diagonales.
-  const buttons=projects.map(p=>`<button type="button" data-service="${esc(p.id)}" aria-label="Ver proyecto: ${esc(p.title)}"><span>${esc(p.title)}</span></button>`).join('')||'<p class="empty-service-note">Próximamente, nuevos proyectos.</p>';
-  const cover=coverHtml(data,s.coverMediaId,s.slug);const first=projects[0];
-  // Conserva la imagen y la etiqueta descriptiva bajo ella, sin la flecha.
-  const caption=String(s.tag||'EXPLORACIÓN VISUAL').trim();
-  const captionHtml=caption.toUpperCase()==='ENFOQUE'?'':`<span class="sample-caption">${esc(caption)}</span>`;
-  const sample=first?`<button type="button" class="sample-button" data-service="${esc(first.id)}" aria-label="Ver ${esc(first.title)}">${cover}${captionHtml}</button>`:`<div class="sample-button is-static">${cover}</div>`;
-  // Oculta la fila final ENFOQUE en todos los servicios, sin modificar los datos.
-  return `<article class="service-panel" id="${esc(s.slug||s.id)}"><header><span class="panel-number">${String(n).padStart(2,'0')}</span><h3>${esc(s.title)}</h3><p>${esc(s.subtitle||'')}</p></header>${sample}<div class="service-list">${buttons}</div></article>`;
-}
+// La web es la app Angular (dist/browser). El Worker le inyecta el contenido
+// publico para que no tenga que pedir /api/public al cargar.
 async function website(request,env){
   const {state}=await readState(env), data=publicData(state);
-  const panels=data.services.map((s,i)=>renderPanel(s,data.projects.filter(p=>p.serviceId===s.id),state,i+1)).join('')||'<article class="service-panel"><header><h3>Próximamente</h3><p>Estamos preparando nuevos proyectos.</p></header></article>';
-  const u=new URL(request.url);u.pathname='/plantilla.html';
-  const template=await env.ASSETS.fetch(new Request(u));
-  if(!template.ok)throw error(500,'La plantilla de la web no está disponible.');
-  const html=(await template.text()).replace('{{DYNAMIC_SERVICE_PANELS}}',panels).replace('{{PUBLIC_CONTENT_JSON}}',safeJson(data));
+  const u=new URL(request.url);u.pathname='/';u.search='';
+  const shell=await env.ASSETS.fetch(new Request(u));
+  if(!shell.ok)throw error(500,'La app web no está disponible. Ejecuta el build de Angular.');
+  const html=(await shell.text()).replace('</head>',`<script>window.jmPortfolioData=${safeJson(data)};</script></head>`);
   return new Response(html,{headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-cache','x-content-type-options':'nosniff','x-frame-options':'SAMEORIGIN'}});
 }
 function originCheck(request){if(['GET','HEAD','OPTIONS'].includes(request.method))return;

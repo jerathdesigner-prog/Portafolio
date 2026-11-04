@@ -1,0 +1,413 @@
+# Pipeline for a Neocore micro-frontend (modeled on frontcore).
+# resolve_versions -> install -> test -> security -> build -> docker -> deploy
+#
+# Canonical template: every `{{TOKEN}}` is derived from `--service` by
+# `scaffold/generate.js` (see scaffold/README.md). Edit the pipeline HERE and
+# regenerate each repo's `.gitlab-ci.yml`; never edit a generated copy by hand.
+# Per-environment secrets are GitLab CI/CD variables scoped to the environment:
+#   API_URL, SECRET_KEY (identical to the host), ENTITY_ROOT, NODE_ENV,
+#   DEPLOY_HOST_DEV, DEPLOY_HOST_QA, DEPLOY_HOST_PREPROD, DEPLOY_SSH_PRIVATE_KEY.
+
+stages:
+  - install
+  - test
+  - security
+  - build
+  - docker
+  - deploy
+
+include:
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
+
+workflow:
+  auto_cancel:
+    on_new_commit: interruptible
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^(main|development|quality|pre-production)$/'
+    - when: never
+
+default:
+  interruptible: true
+  tags:
+    - $RUNNER_TAG
+
+variables:
+  # ---- Per-repo values (derived by scaffold/generate.js) ------------------
+  RUNNER_TAG: '{{RUNNER_TAG}}'
+  # Service key in each server compose (docker compose up <SERVICE_NAME>).
+  SERVICE_NAME_DEV: '{{SERVICE_NAME_DEV}}'
+  SERVICE_NAME_QA: '{{SERVICE_NAME_QA}}'
+  SERVICE_NAME_PREPROD: '{{SERVICE_NAME_PREPROD}}'
+  # container_name in the server compose (used only by the docker ps check).
+  CONTAINER_NAME: '{{CONTAINER_NAME}}'
+  # Variable the server compose reads for the image:
+  #   image: ${{{COMPOSE_IMAGE_VAR}}:-<registry>/{{SERVICE_NAME}}:<channel>}
+  COMPOSE_IMAGE_VAR: '{{COMPOSE_IMAGE_VAR}}'
+  COMPOSE_FILE_DEV: '{{COMPOSE_FILE_DEV}}'
+  COMPOSE_FILE_QA: '{{COMPOSE_FILE_QA}}'
+  COMPOSE_FILE_PREPROD: '{{COMPOSE_FILE_PREPROD}}'
+  # ---- Shared values -------------------------------------------------------
+  # Keep bun's download cache inside the project so `cache:` can capture it.
+  BUN_INSTALL_CACHE_DIR: '$CI_PROJECT_DIR/.bun-cache'
+  # BUN_VERSION / NODE_MAJOR are NOT set here: `resolve_versions` reads them
+  # from `.bun-version` / `.node-version` (single source of truth, same as
+  # backtemplate) and every job gets them through its dotenv artifact.
+
+# Two caches: a stable download store, and node_modules keyed by bun.lock.
+.bun_store_cache: &bun_store_cache
+  key: 'bun-store'
+  paths:
+    - .bun-cache/
+
+.bun_modules_cache: &bun_modules_cache
+  key:
+    files:
+      - bun.lock
+  paths:
+    - node_modules/
+
+# Private @neocore registry (libcomponents, project {{NEOCORE_NPM_PROJECT_ID}}) authenticated with
+# CI_JOB_TOKEN. This project must be in the job-token allowlist of
+# neocore/core/libcomponents. .npmrc is never versioned (.gitignore).
+.npmrc_setup: &npmrc_setup
+  - echo "@neocore:registry=https://gitads.aseguradoradelsur.com/api/v4/projects/{{NEOCORE_NPM_PROJECT_ID}}/packages/npm/" > .npmrc
+  - echo "//gitads.aseguradoradelsur.com/api/v4/projects/{{NEOCORE_NPM_PROJECT_ID}}/packages/npm/:_authToken=${CI_JOB_TOKEN}" >> .npmrc
+
+# Reads the tool versions from the repo files (same job as backtemplate).
+# `.node-version` is a full semver; the Node images are tagged by major.
+resolve_versions:
+  stage: .pre
+  image: alpine:3.20
+  variables:
+    GIT_DEPTH: '1'
+  script:
+    - echo "BUN_VERSION=$(tr -d '[:space:]' < .bun-version)" > versions.env
+    - NODE_VERSION="$(tr -d '[:space:]' < .node-version)"
+    - echo "NODE_MAJOR=${NODE_VERSION%%.*}" >> versions.env
+    - cat versions.env
+  artifacts:
+    reports:
+      dotenv: versions.env
+
+.bun_job:
+  image: oven/bun:${BUN_VERSION}-slim
+  needs:
+    - job: resolve_versions
+  cache:
+    - <<: *bun_store_cache
+      policy: pull
+    - <<: *bun_modules_cache
+      policy: pull
+  before_script:
+    - *npmrc_setup
+    # Verifies the lockfile against the restored cache (fast on a warm cache).
+    - bun install --frozen-lockfile --ignore-scripts
+
+install_deps:
+  extends: .bun_job
+  stage: install
+  # Only job that writes the caches.
+  cache:
+    - <<: *bun_store_cache
+      policy: pull-push
+    - <<: *bun_modules_cache
+      policy: pull-push
+  script:
+    - echo "bun $(bun -v) / node $(bun -e 'console.log(process.version)')"
+    - echo "Dependencies installed"
+
+# Tests run on Node (not Bun), like backtemplate: the Angular unit-test
+# builder and node:test run under the same runtime the developers use. Bun is
+# only used to install dependencies (reuses the lockfile/store cache).
+# Intentionally NOT `needs: install_deps` (it only warms the cache for future
+# pipelines): lint, format and tests start right after `resolve_versions`.
+.test_base:
+  stage: test
+  image: node:${NODE_MAJOR}-slim
+  cache:
+    - <<: *bun_store_cache
+      policy: pull
+    - <<: *bun_modules_cache
+      policy: pull
+  before_script:
+    - *npmrc_setup
+    - npm install -g bun@${BUN_VERSION}
+    - bun install --frozen-lockfile --ignore-scripts
+  needs:
+    - job: resolve_versions
+
+# lint / format:check are ADVISORY: a failure shows as a warning (orange) and
+# never blocks build_app. Forks predate Oxc and carry hundreds of legacy lint and
+# format findings; fixing them is incremental work, not a release gate. New code
+# is still formatted by the pre-commit hook (lint-staged runs oxfmt).
+lint:
+  extends: .test_base
+  allow_failure: true
+  script:
+    - npm run lint
+
+format:check:
+  extends: .test_base
+  allow_failure: true
+  script:
+    - npm run format:check
+
+test:unit:
+  extends: .test_base
+  variables:
+    # Unit tests only need the base environment file, not the remote config.
+    SKIP_ENV_FETCH: '1'
+  script:
+    # Forks that run Angular tests in a real browser (vitest browser mode via
+    # @vitest/browser-playwright) need Chromium and its system libraries, which
+    # the node:*-slim image does not ship. No-op when Playwright is not installed
+    # (the template itself tests on jsdom).
+    - if [ -d node_modules/playwright ]; then npx playwright install --with-deps --only-shell chromium; fi
+    # Angular unit tests (vitest) + node:test for scripts/ (incl. the
+    # .node-version/.bun-version guard).
+    - npm run test
+
+semgrep-sast:
+  stage: security
+  dependencies: []
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - gl-sast-report.json
+    reports:
+      sast: gl-sast-report.json
+
+secret_detection:
+  stage: security
+  dependencies: []
+  variables:
+    SECRET_DETECTION_EXCLUDED_PATHS: '.npmrc'
+  allow_failure: false
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - gl-secret-detection-report.json
+    reports:
+      secret_detection: gl-secret-detection-report.json
+
+# Security gate: fails when the scanner report has findings with a blocking
+# severity (FAIL_SEVERITIES) that are not accepted in the optional allow-list
+# .security/sast-allowlist.txt (lines "<semgrep_rule_id>|<file>", # comments).
+.security_gate:
+  stage: security
+  image: alpine:3.20
+  script:
+    - apk add --no-cache jq >/dev/null
+    - |
+      set -eu
+      if [ ! -f "${REPORT_FILE}" ]; then
+        echo "${REPORT_FILE} was not generated (scanner failed or did not run)."
+        exit 1
+      fi
+      ALLOWLIST_FILE="${FP_ALLOWLIST_FILE:-.security/sast-allowlist.txt}"
+      [ -f "${ALLOWLIST_FILE}" ] || ALLOWLIST_FILE="$(mktemp)"
+      BLOCKING=$(jq -r --arg s "${FAIL_SEVERITIES}" --rawfile allow "${ALLOWLIST_FILE}" '
+        ($s | split(",")) as $fail
+        | ($allow | split("\n") | map(gsub("#.*";"") | gsub("^\\s+|\\s+$";"")) | map(select(length>0))) as $ok
+        | [ .vulnerabilities[]
+            | (.severity // "Unknown") as $sev
+            | ([.identifiers[]? | select(.type=="semgrep_id") | .value] | first // "-") as $rule
+            | select(($fail | index($sev)) and (($ok | index($rule + "|" + (.location.file // "?"))) | not))
+            | "[\($sev)] \(.name) — \(.location.file // "?"):\(.location.start_line // "?") (\($rule))" ]
+        | .[]' "${REPORT_FILE}")
+      if [ -n "${BLOCKING}" ]; then
+        echo "${GATE_TITLE}: blocking findings [${FAIL_SEVERITIES}]:"
+        echo "${BLOCKING}"
+        exit 1
+      fi
+      echo "${GATE_TITLE}: no blocking findings."
+
+secret_detection_gate:
+  extends: .security_gate
+  needs:
+    - job: secret_detection
+      artifacts: true
+  variables:
+    GATE_TITLE: 'SECRET DETECTION'
+    REPORT_FILE: 'gl-secret-detection-report.json'
+    FAIL_SEVERITIES: 'Critical,High,Medium,Low,Info,Unknown'
+
+semgrep_sast_gate:
+  extends: .security_gate
+  needs:
+    - job: semgrep-sast
+      artifacts: true
+  variables:
+    GATE_TITLE: 'SEMGREP SAST'
+    REPORT_FILE: 'gl-sast-report.json'
+    FAIL_SEVERITIES: 'Critical,High'
+
+build_app:
+  extends: .bun_job
+  stage: build
+  environment:
+    name: $CI_COMMIT_BRANCH
+    action: prepare
+  script:
+    # Values come from environment-scoped CI/CD variables. The file is never
+    # printed nor published as an artifact: it contains SECRET_KEY.
+    # Fork-specific keys: regenerate with --extra-env-keys=KEY[,KEY].
+    - |
+      cat > .env << EOF
+      NODE_ENV=$NODE_ENV
+      API_URL=$API_URL
+      ENTITY_ROOT=$ENTITY_ROOT
+      SECRET_KEY=$SECRET_KEY
+      {{EXTRA_ENV_LINES}}
+      EOF
+    - bun run build
+    - test -f dist/browser/remoteEntry.json
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 2 hours
+  needs:
+    - job: resolve_versions
+    - job: lint
+      artifacts: false
+    - job: format:check
+      artifacts: false
+    - job: test:unit
+      artifacts: false
+    - job: semgrep_sast_gate
+      artifacts: false
+    - job: secret_detection_gate
+      artifacts: false
+
+build_image:
+  stage: docker
+  image: docker:25.0.3
+  services:
+    - docker:25.0.3-dind
+  variables:
+    DOCKER_TLS_CERTDIR: '/certs'
+    DOCKER_DRIVER: overlay2
+  before_script:
+    - apk add --no-cache jq >/dev/null
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+  script:
+    - |
+      set -eu
+      VERSION=$(jq -r '.version' package.json)
+      case "$CI_COMMIT_BRANCH" in
+        main)           ENV_CODE="lts";      CHANNEL="stable" ;;
+        development)    ENV_CODE="dev";      CHANNEL="dev" ;;
+        quality)        ENV_CODE="qa";       CHANNEL="qa" ;;
+        pre-production) ENV_CODE="pre-prod"; CHANNEL="pre-prod" ;;
+        *) echo "Unsupported branch: $CI_COMMIT_BRANCH"; exit 1 ;;
+      esac
+      IMAGE_COMMIT="$CI_REGISTRY_IMAGE:${VERSION}-${ENV_CODE}-${CI_COMMIT_SHORT_SHA}"
+      IMAGE_CHANNEL="$CI_REGISTRY_IMAGE:${CHANNEL}"
+      # DIST_STAGE=prebuilt reuses dist/ from build_app instead of rebuilding.
+      docker build --target runtime \
+        --build-arg DIST_STAGE=prebuilt \
+        --build-arg BUN_VERSION="$BUN_VERSION" \
+        --build-arg VERSION="$VERSION" \
+        -t "$IMAGE_COMMIT" -t "$IMAGE_CHANNEL" .
+      docker push "$IMAGE_COMMIT"
+      docker push "$IMAGE_CHANNEL"
+      printf 'IMAGE_COMMIT=%s\nIMAGE_CHANNEL=%s\n' "$IMAGE_COMMIT" "$IMAGE_CHANNEL" > variables.env
+  artifacts:
+    reports:
+      dotenv: variables.env
+    expire_in: 1 day
+  needs:
+    - job: resolve_versions
+    - job: build_app
+      artifacts: true
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
+
+# Deploy over SSH with the docker compose file that lives on each server.
+# The pipeline exports COMPOSE_IMAGE_VAR=<exact commit image> so the server
+# deploys exactly what was built; without it the compose falls back to the
+# channel tag.
+.deploy_base:
+  stage: deploy
+  image: alpine:latest
+  variables:
+    DEPLOY_USER: 'root'
+    DEPLOY_SSH_PORT: '22'
+    RESTART_NGINX: 'false'
+  before_script:
+    - apk add --no-cache openssh-client
+    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    - echo "$DEPLOY_SSH_PRIVATE_KEY" > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan -p ${DEPLOY_SSH_PORT} "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+  script:
+    - |
+      set -eu
+      echo "Deploying $IMAGE_COMMIT to ${CI_ENVIRONMENT_NAME} ($DEPLOY_HOST)"
+      ssh -p ${DEPLOY_SSH_PORT} ${DEPLOY_USER}@${DEPLOY_HOST} \
+        "CI_REGISTRY_PASSWORD='${CI_REGISTRY_PASSWORD}'" \
+        "CI_REGISTRY_USER='${CI_REGISTRY_USER}'" \
+        "CI_REGISTRY='${CI_REGISTRY}'" \
+        "SERVICE_NAME='${SERVICE_NAME}'" \
+        "CONTAINER_NAME='${CONTAINER_NAME}'" \
+        "COMPOSE_FILE='${COMPOSE_FILE}'" \
+        "COMPOSE_IMAGE_VAR='${COMPOSE_IMAGE_VAR}'" \
+        "RESTART_NGINX='${RESTART_NGINX}'" \
+        "IMAGE_COMMIT='${IMAGE_COMMIT}'" \
+        bash << 'ENDSSH'
+        set -eu
+        [ -f "$COMPOSE_FILE" ] || { echo "Compose file not found on server: $COMPOSE_FILE"; exit 1; }
+        if docker compose version >/dev/null 2>&1; then COMPOSE="docker compose";
+        elif command -v docker-compose >/dev/null 2>&1; then COMPOSE="docker-compose";
+        else echo "docker compose is not installed on the server"; exit 1; fi
+        echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+        export "$COMPOSE_IMAGE_VAR=$IMAGE_COMMIT"
+        $COMPOSE -f "$COMPOSE_FILE" pull "$SERVICE_NAME"
+        $COMPOSE -f "$COMPOSE_FILE" up -d --force-recreate --no-deps "$SERVICE_NAME"
+        sleep 5
+        docker ps --filter "name=$CONTAINER_NAME" --format "table {{.Names}}\t{{.Image}}\t{{.Status}}"
+        if [ "$RESTART_NGINX" = "true" ]; then docker restart nginx 2>/dev/null || true; fi
+      ENDSSH
+  needs:
+    - job: build_image
+      artifacts: true
+
+deploy:development:
+  extends: .deploy_base
+  environment:
+    name: development
+  variables:
+    DEPLOY_HOST: '$DEPLOY_HOST_DEV'
+    COMPOSE_FILE: '$COMPOSE_FILE_DEV'
+    SERVICE_NAME: '$SERVICE_NAME_DEV'
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "development"'
+
+deploy:quality:
+  extends: .deploy_base
+  environment:
+    name: quality
+  variables:
+    DEPLOY_HOST: '$DEPLOY_HOST_QA'
+    COMPOSE_FILE: '$COMPOSE_FILE_QA'
+    SERVICE_NAME: '$SERVICE_NAME_QA'
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "quality"'
+
+deploy:pre-production:
+  extends: .deploy_base
+  environment:
+    name: pre-production
+  variables:
+    DEPLOY_HOST: '$DEPLOY_HOST_PREPROD'
+    COMPOSE_FILE: '$COMPOSE_FILE_PREPROD'
+    SERVICE_NAME: '$SERVICE_NAME_PREPROD'
+    # nginx reverse-proxies pre-production; restart it to re-resolve upstreams.
+    RESTART_NGINX: 'true'
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "pre-production"'

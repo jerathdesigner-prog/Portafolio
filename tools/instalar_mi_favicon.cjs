@@ -4,7 +4,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const root = process.cwd();
-const targets = ['public/index.html', 'public/plantilla.html', 'public/static/admin.html'];
+const targets = ['src/index.html', 'public/static/admin.html'];
 const assets = ['favicon.ico', 'favicon-16.png', 'favicon-32.png', 'favicon-48.png',
   'apple-touch-icon.png', 'android-chrome-192x192.png', 'android-chrome-512x512.png'];
 if (!fs.existsSync(path.join(root,'wrangler.jsonc'))) {

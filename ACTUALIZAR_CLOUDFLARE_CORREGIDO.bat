@@ -12,8 +12,8 @@ if not exist "wrangler.jsonc" (
   pause
   exit /b 1
 )
-if not exist "src\index.mjs" (
-  echo ERROR: No se encontro src\index.mjs.
+if not exist "worker\index.mjs" (
+  echo ERROR: No se encontro worker\index.mjs.
   echo Comprueba que copiaste los archivos actualizados.
   pause
   exit /b 1
@@ -27,6 +27,12 @@ if errorlevel 1 (
 echo Publicando los archivos actuales en Cloudflare Workers...
 echo No se restablecera la base D1 ni se borrara el bucket R2.
 echo.
+call npm.cmd install
+if errorlevel 1 (
+  echo ERROR: No se pudieron instalar las dependencias.
+  pause
+  exit /b 1
+)
 call npx.cmd wrangler deploy
 set "DEPLOY_RESULT=%ERRORLEVEL%"
 echo.
