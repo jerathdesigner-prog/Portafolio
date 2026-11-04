@@ -413,9 +413,10 @@ export function startPortfolioMotion(portfolio: PublicPortfolio): void {
       const top=revealShell.getBoundingClientRect().top;
       // Escritorio: el sticky retiene Reconocimientos detrás mientras entra Contacto.
       // Móvil: respeta la altura natural de la ilustración y del pie de página.
-      // Barrido breve: medio viewport en lugar de dos pantallas.
+      // Barrido breve en escritorio: 30% del viewport (unos 3 pasos de rueda),
+      // igual al recorrido extra del contenedor (130svh - 100svh) en el CSS.
       // El último fotograma queda totalmente alineado antes de salir el sticky.
-      const distance=mobile?vh*.55:vh*.53;
+      const distance=mobile?vh*.55:vh*.30;
       const progress=mobile?clamp01((vh*.55-top)/distance):clamp01((-top)/distance);
       const t=ease(progress);
       contactArea.style.setProperty('--reveal-x',((1-t)*100).toFixed(3)+'%');
@@ -430,7 +431,7 @@ export function startPortfolioMotion(portfolio: PublicPortfolio): void {
       e.preventDefault();
       const mobile=matchMedia('(max-width: 650px)').matches;
       const target=revealShell.getBoundingClientRect().top+scrollY+
-        (reducedMedia.matches?0:(mobile?innerHeight*.015:innerHeight*.54));
+        (reducedMedia.matches?0:(mobile?innerHeight*.015:innerHeight*.31));
       scrollTo({top:target,behavior:reducedMedia.matches?'instant':'smooth'});
     }));
     requestAnimationFrame(updateContactReveal);

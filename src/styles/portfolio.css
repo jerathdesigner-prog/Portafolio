@@ -1368,13 +1368,15 @@ body.project-open .awards-section::after{opacity:0!important;animation:none!impo
 }
 
 /* ===== Entrada final optimizada: duración y encabezado sincronizados =====
-   100svh de panel + 55svh de recorrido; la escena de reconocimientos real
-   permanece detrás, sin duplicar tarjetas. */
+   100svh de panel + 30svh de recorrido (unos 3 pasos de rueda). El contenedor
+   se superpone al último viewport de Reconocimientos (margin-top -100svh), así
+   Contacto empieza a entrar apenas se ven todos los certificados, sin un
+   viewport de scroll muerto antes. */
 @media (min-width:651px) and (prefers-reduced-motion:no-preference){
   .contact-reveal-shell,
   .contact-reveal-shell.contact-ready{
-    height:155svh!important;
-    margin-top:0!important;
+    height:130svh!important;
+    margin-top:-100svh!important;
   }
 }
 /* Menor distancia en teléfono; conserva su composición vertical natural. */
