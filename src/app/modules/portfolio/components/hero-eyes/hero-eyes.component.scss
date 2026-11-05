@@ -1,0 +1,38 @@
+// Same box as the hero <img> (2:3 drawing, no letterboxing).
+:host {
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.hero-eyes__patch,
+.hero-eyes__eye {
+  position: absolute;
+}
+
+// Undo the global `.character-float img` rules (bottom fade mask, contain).
+.hero-eyes__patch {
+  display: block;
+  mask-image: none;
+  object-fit: fill;
+  user-select: none;
+}
+
+// Pupils hide under the eyelids instead of leaving the eye.
+.hero-eyes__eye {
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+// Painted-pupil look: near-black iris with the illustration's highlight.
+.hero-eyes__pupil {
+  background:
+    radial-gradient(
+      circle at 66% 30%,
+      rgb(255 255 255 / 92%) 0 11%,
+      rgb(255 255 255 / 0%) 15%
+    ),
+    radial-gradient(circle, #0c0c0e 0 60%, #1d1a17 84%, rgb(29 26 23 / 0%) 100%);
+  border-radius: 50%;
+  position: absolute;
+}

@@ -35,8 +35,8 @@ Worker `jerathmoreira-cms`, D1 `jerathmoreira-db`, R2 `jerathmoreira-media`).
 1. `cd` to the repo root (where `wrangler.jsonc` lives).
 2. `npx wrangler whoami` — must be the account that owns `jerathmoreira.com`.
 3. `git status -sb` — report branch, merge state and uncommitted files.
-4. `bun run build && bun run test && bun run test:worker` (`test:worker` needs the build).
-5. `bun run deploy` (`wrangler deploy` reruns the build via `build.command`).
+4. `bun run build:site && bun run test && bun run test:worker` (`test:worker` reads `dist-site`).
+5. `bun run deploy` (`wrangler deploy` reruns `build:site` via `build.command`).
 6. Verify: `curl -s -o /dev/null -w "%{http_code}"` on `https://jerathmoreira.com/`,
    `/api/health` and `/admin` (expect 200), and that `/` contains `jmPortfolioData=`.
 

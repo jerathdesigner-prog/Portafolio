@@ -3,8 +3,8 @@ import { DatabaseSync } from 'node:sqlite';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import app from '../worker/index.mjs';
-// Angular build output (run `bun run build` first): what the Worker serves.
-const base=new URL('../dist/browser/',import.meta.url).pathname;
+// Site build output (run `bun run build:site` first): what the Worker serves.
+const base=new URL('../dist-site/browser/',import.meta.url).pathname;
 const sql=new DatabaseSync(':memory:');
 const media=new Map();
 const env={

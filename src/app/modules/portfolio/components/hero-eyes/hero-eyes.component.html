@@ -1,0 +1,28 @@
+<img
+  class="hero-eyes__patch"
+  alt=""
+  draggable="false"
+  [src]="patch.url"
+  [style.left.%]="patchBox.left"
+  [style.top.%]="patchBox.top"
+  [style.width.%]="patchBox.width"
+  [style.height.%]="patchBox.height"
+/>
+@for (eye of eyes; track $index) {
+  <span
+    class="hero-eyes__eye"
+    [style.left.%]="eye.box.left"
+    [style.top.%]="eye.box.top"
+    [style.width.%]="eye.box.width"
+    [style.height.%]="eye.box.height"
+  >
+    <span
+      #pupil
+      class="hero-eyes__pupil"
+      [style.left.%]="eye.rest.left"
+      [style.top.%]="eye.rest.top"
+      [style.width.%]="eye.rest.width"
+      [style.height.%]="eye.rest.height"
+    ></span>
+  </span>
+}

@@ -17,8 +17,20 @@
     />
     <title>Jerath Moreira — Diseño &amp; Dirección Creativa</title>
     <link rel="icon" type="image/png" href="/static/media/d087ebf02905.png" />
-    <link href="https://fonts.googleapis.com" rel="preconnect" />
-    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <!-- Download the hero (LCP) and the font with the HTML, not after Angular boots. -->
+    <link
+      rel="preload"
+      as="image"
+      href="/static/media/a0ea6851412f.webp"
+      fetchpriority="high"
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/static/media/19943b6e5746.woff2"
+      crossorigin
+    />
   </head>
   <body>
     <!-- Preloader independiente: la página de abajo sigue preparando su contenido. -->
