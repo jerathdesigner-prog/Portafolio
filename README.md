@@ -11,10 +11,16 @@ One-page portfolio built on [front-template](https://gitads.aseguradoradelsur.co
 
 ```bash
 bun install
-bun run worker:dev     # builds Angular and runs the Worker on http://localhost:8787
-bun run test:worker    # Worker smoke test (needs a previous `bun run build`)
+bun run worker:dev     # builds the site and runs the Worker on http://localhost:8787
+bun run build:site     # site build the Worker serves (dist-site/, no federation)
+bun run test:worker    # Worker smoke test (needs a previous `bun run build:site`)
 bun run deploy         # wrangler deploy (builds first)
 ```
+
+The Worker serves `build:site`: the same app without Native Federation (no
+`es-module-shims`, no host plumbing in `app.config.site.ts`), much lighter. `bun run build` stays
+the template's federation build. Hashed files (`*-HASH.js/css`, `/static/media/<hash>.*`) are
+cached for a year: when a media file changes, give it a new content-hash name.
 
 `/admin` needs `ADMIN_PASSWORD` and `SESSION_SECRET` in `.dev.vars` locally, and as Wrangler
 secrets in production. The Windows scripts (`DEPLOY_CLOUDFLARE.bat`, `ACTUALIZAR_*.bat`) keep working.

@@ -66,3 +66,6 @@ bun.lockb
 # Cloudflare Workers (wrangler dev state and local secrets)
 .wrangler/
 .dev.vars*
+
+# Standalone site build served by the Cloudflare Worker (no federation)
+/dist-site

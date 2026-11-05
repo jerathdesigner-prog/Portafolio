@@ -9,6 +9,7 @@
     "env": "node load-env.js",
     "start": "node load-env.js && ng serve",
     "build": "node load-env.js && ng build",
+    "build:site": "node load-env.js && ng run mf-template:site",
     "watch": "node load-env.js && ng build --watch --configuration development",
     "test": "SKIP_ENV_FETCH=1 node load-env.js --example && ng test --watch=false && bun run test:scripts",
     "test:watch": "SKIP_ENV_FETCH=1 node load-env.js --example && ng test",

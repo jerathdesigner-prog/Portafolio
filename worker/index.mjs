@@ -223,6 +223,16 @@ async function handler(request,env){
   if(path.startsWith('/api/admin/'))return adminCrud(request,env,path);
   if(path.startsWith('/uploads/'))return mediaRequest(request,env,path.slice('/uploads/'.length));
   if(path.startsWith('/api/'))throw error(404,'Ruta no encontrada.');
-  return env.ASSETS.fetch(request);
+  return staticAsset(request,env,path);
+}
+// Archivos con hash en el nombre (build de Angular y /static/media extraídos):
+// su contenido nunca cambia, el navegador puede guardarlos un año.
+const IMMUTABLE_ASSET=/(?:-[A-Z0-9]{8}\.(?:js|css)|^\/static\/media\/[0-9a-f]{12}\.[a-z0-9]+)$/;
+async function staticAsset(request,env,path){
+  const res=await env.ASSETS.fetch(request);
+  if(!res.ok||!IMMUTABLE_ASSET.test(path))return res;
+  const out=new Response(res.body,res);
+  out.headers.set('cache-control','public, max-age=31536000, immutable');
+  return out;
 }
 export default {async fetch(request,env){try{return await handler(request,env);}catch(e){const st=e.status||500; if(st>=500)console.error('Jerath CMS:',e);return jresp({detail:st>=500?'Error del servidor. Revisa los logs de Workers.':e.message},st);}}};

@@ -1,6 +1,6 @@
 /**
  * Eye geometry of the hero illustration, in pixels of the original image
- * (`HERO_IMAGE_SIZE`). Measured on `/static/media/79cbebdb84b4.webp`; the patch
+ * (`HERO_IMAGE_SIZE`). Measured on `/static/media/a0ea6851412f.webp`; the patch
  * `/static/media/hero-eyes-patch.webp` is that same region with the painted
  * pupils removed, so the CSS pupils can move over a blank sclera.
  */

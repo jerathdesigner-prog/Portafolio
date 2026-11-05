@@ -1,11 +1,10 @@
-// A host never runs this remote's `polyfills`, so the exposed entry installs
-// Temporal itself (only where the browser lacks it, e.g. Safari/iOS).
-import 'temporal-polyfill/global';
 import type { Routes } from '@angular/router';
 
 /**
  * The public portfolio, mounted at `/` by app.routes.ts. Not exposed to a
- * federation host: it is served by the Cloudflare Worker as a standalone app.
+ * federation host: it is served by the Cloudflare Worker as a standalone app,
+ * so it skips the Temporal polyfill import exposed entries need (it uses no
+ * Temporal; the `site` build in angular.json omits that polyfill too).
  */
 export const PortfolioRoutes: Routes = [
   {

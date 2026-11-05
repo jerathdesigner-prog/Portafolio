@@ -1,5 +1,5 @@
 /* Portfolio design system, migrated verbatim from the legacy plantilla.html. */
-@font-face{font-family:"Coolvetica";src:url("/static/media/d15c4b7dc336.ttf") format("truetype");font-style:normal;font-weight:400 900;font-display:swap;}
+@font-face{font-family:"Coolvetica";src:url("/static/media/19943b6e5746.woff2") format("woff2");font-style:normal;font-weight:400 900;font-display:swap;}
 :root{--scarab:#23312D;--oasis:#B0B454;--sylvan:#E7EACB;--sage:#E7EACB;--paper:#f2f1e2;--dark:#23312D;--ink:#f4f3e7;--muted:rgba(244,243,231,.68);--script:'Caveat','Segoe Print','Comic Sans MS',cursive;--sans:'Coolvetica','DM Sans',Arial,sans-serif;--cool:'Coolvetica','DM Sans',Arial,sans-serif;font-synthesis:none;color-scheme:light}
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:5rem}
@@ -384,7 +384,7 @@ html,body,button,input,textarea,select,option{font-family:"Coolvetica",Arial,san
   position:relative;
   isolation:isolate;
   background:#E7EACB;
-  background-image:url("/static/media/6dbae67543b1.webp");
+  background-image:url("/static/media/6ee57f6a0ad6.webp");
   background-size:cover;
   background-repeat:no-repeat;
   background-position:center center;
@@ -413,7 +413,7 @@ html,body,button,input,textarea,select,option{font-family:"Coolvetica",Arial,san
     display:flex!important;
     flex-direction:column;
     justify-content:flex-end;
-    background-image:url("/static/media/790e5aa87b63.webp");
+    background-image:url("/static/media/a19eba443aca.webp");
     background-size:cover;
     background-position:center top;
     background-repeat:no-repeat;
@@ -483,7 +483,7 @@ html,body,button,input,textarea,select,option{font-family:"Coolvetica",Arial,san
 
 /* Trama de impresión derivada de la zona vacía de la referencia del usuario.
    Punteado irregular, líneas horizontales y motas, con desplazamiento sutil. */
-:root{--jm-paper-texture:url("/static/media/6c48b36c079d.png")}
+:root{--jm-paper-texture:url("/static/media/99feebc3ca39.webp")}
 .jm-film-grain{display:none!important}
 body::before,body::after{
   content:"";
